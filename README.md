@@ -18,12 +18,12 @@ This is your team's repository for the four-week physical AI hackathon run by Ro
 ## First week
 
 - [X] Everyone on the team has an ALL AI Network account and has joined this team in the [workspace](https://dashboard.all-ai-network.org/j/L36HEH).
-- [ ] Everyone has connected GitHub and accepted the repository invitation (check your GitHub email, or open the workspace and press the check button).
-- [ ] Pick your dataset. We recommend one strong solution around a single dataset.
-- [ ] Download the data and make sure everyone who needs it can open it.
-- [ ] Read the compute guide and decide what you'll need.
-- [ ] Join Slack, open `#hackathon-announcements`, and find your dataset's channel.
-- [ ] Submit the [team plan](https://dashboard.all-ai-network.org/s/V28NHK) by Wednesday, October 14. It's a short resource request, not a graded paper, and any teammate can update it before the deadline.
+- [X] Everyone has connected GitHub and accepted the repository invitation (check your GitHub email, or open the workspace and press the check button).
+- [X] Pick your dataset. We recommend one strong solution around a single dataset.
+- [X] Download the data and make sure everyone who needs it can open it.
+- [X] Read the compute guide and decide what you'll need.
+- [X] Join Slack, open `#hackathon-announcements`, and find your dataset's channel.
+- [X] Submit the [team plan](https://dashboard.all-ai-network.org/s/V28NHK) by Wednesday, October 14. It's a short resource request, not a graded paper, and any teammate can update it before the deadline.
 
 ## The three datasets
 
