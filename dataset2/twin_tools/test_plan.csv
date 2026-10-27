@@ -1,0 +1,4 @@
+out,frame,liquid_r,liquid_g,liquid_b,stream_r,stream_g,stream_b,opacity
+default_686.png,686,,,,,,,
+orange_686.png,686,0.45,0.12,0.01,,,,
+green_carryover_300.png,300,0.10,0.30,0.05,0.45,0.12,0.01,
