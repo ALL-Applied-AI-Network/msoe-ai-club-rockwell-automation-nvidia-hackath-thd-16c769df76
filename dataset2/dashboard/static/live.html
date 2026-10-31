@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live CSI Test · Carryover Monitor</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body data-mode="live">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark small">THD</div>
+      <div><span class="eyebrow">CSI FLUID MIXING · STATION 3</span><h1>Live CSI Test</h1></div>
+    </div>
+    <nav class="mode-nav" aria-label="Dashboard modes">
+      <a href="/demo">Saved Run Demo</a>
+      <a class="active" href="/live">Live CSI Test</a>
+    </nav>
+    <div class="topbar-status">
+      <span id="connectionDot" class="status-dot waiting"></span>
+      <span id="connectionText">Connecting…</span>
+      <span class="advisory-pill">MONITOR ONLY · NO PLC CONTROL</span>
+    </div>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="safety-banner">
+      This page starts and manages the advisory camera/model monitor only. Start and operate the physical line separately under CSI procedures.
+    </section>
+
+    <section class="live-control-grid">
+      <article class="panel recipe-builder-panel">
+        <div class="section-heading">
+          <span>Manual recipe queue</span>
+          <span id="draftStatus" class="muted">Not saved</span>
+        </div>
+        <div class="builder-toolbar">
+          <button id="addRecipeRow" class="secondary-button" type="button">Add vial</button>
+          <button id="importQueueButton" class="secondary-button" type="button">Import CSV</button>
+          <input id="queueFileInput" class="hidden" type="file" accept=".csv,text/csv">
+          <span class="toolbar-spacer"></span>
+          <button id="validateQueueButton" class="secondary-button" type="button">Validate</button>
+          <button id="saveQueueButton" type="button">Save queue</button>
+        </div>
+        <div class="recipe-editor-wrap">
+          <table class="recipe-editor">
+            <thead><tr><th>Vial</th><th>Recipe</th><th>T-100</th><th>T-200</th><th>T-400</th><th>Total</th><th>Expected</th><th></th></tr></thead>
+            <tbody id="recipeEditorBody"></tbody>
+          </table>
+        </div>
+        <div id="queueFeedback" class="control-feedback">Enter or import the recipes that will be run on the physical line.</div>
+      </article>
+
+      <article class="panel run-control-panel">
+        <div class="section-heading"><span>Live monitor control</span><span id="runStateBadge" class="status-chip">Stopped</span></div>
+        <div class="run-control-body">
+          <label>Run profile
+            <select id="runProfile"><option value="live_camera">CSI live camera</option></select>
+          </label>
+          <label>Next physical fill is vial
+            <select id="startVial"></select>
+          </label>
+          <div class="run-buttons">
+            <button id="startRunButton" type="button">Start live monitoring</button>
+            <button id="pauseRunButton" class="secondary-button" type="button">Pause</button>
+            <button id="resumeRunButton" class="secondary-button" type="button">Resume</button>
+            <button id="realignRunButton" class="warning-button" type="button">Realign next vial</button>
+            <button id="stopRunButton" class="danger-button" type="button">Stop monitor</button>
+          </div>
+          <div id="runDetails" class="run-details">No live run has been started.</div>
+          <div id="configurationChecks" class="configuration-checks"></div>
+          <div id="controlFeedback" class="control-feedback"></div>
+        </div>
+      </article>
+    </section>
+
+    <section id="alertBanner" class="alert-banner hidden" aria-live="assertive"></section>
+
+    <section class="hero-grid live-hero-grid">
+      <article class="panel camera-panel">
+        <div class="section-heading"><span>Live camera</span><span id="frameStatus" class="camera-status waiting">Waiting for frame</span></div>
+        <div id="frameShell" class="frame-shell empty">
+          <img id="liveFrame" alt="Latest vial-fill camera frame" decoding="async">
+          <div id="modelRoi" class="roi-overlay model-roi"><span>MODEL ROI</span></div>
+          <div id="ruleRoi" class="roi-overlay rule-roi"><span>COLOR ROI</span></div>
+          <div id="framePlaceholder" class="frame-placeholder">Start live monitoring to receive camera frames</div>
+        </div>
+        <div class="camera-meta">
+          <div><span>Captured</span><strong id="frameCaptured">—</strong></div>
+          <div><span>Frame age</span><strong id="frameAge">—</strong></div>
+          <div class="camera-source"><span>Source</span><strong id="frameSource">—</strong></div>
+        </div>
+      </article>
+      <article class="panel current-panel">
+        <div class="section-heading"><span>Current operation</span><span id="currentStatus" class="status-chip">Waiting</span></div>
+        <div id="currentRecipe" class="current-recipe empty-state">Save a recipe queue and start monitoring.</div>
+      </article>
+      <article class="panel signal-panel">
+        <div class="section-heading"><span>Live model signal</span><span class="live-dot"></span></div>
+        <div class="probability-wrap">
+          <div><strong id="probabilityValue">—</strong><span>observed defect probability</span></div>
+          <div class="meter"><div id="probabilityBar"></div><i id="thresholdMarker"></i></div>
+        </div>
+        <div id="modelDetails" class="model-details">Waiting for neural predictions.</div>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel queue-panel">
+        <div class="section-heading"><span>Active queue</span><span id="queueSummary" class="muted">0 recipes</span></div>
+        <div class="queue-table-wrap">
+          <table><thead><tr><th>Vial</th><th>Recipe</th><th>Composition</th><th>Status</th><th>Risk</th></tr></thead><tbody id="queueBody"></tbody></table>
+        </div>
+      </article>
+      <article class="panel events-panel">
+        <div class="section-heading"><span>Live event timeline</span><span id="eventCount" class="muted">0 events</span></div>
+        <div id="eventsList" class="events-list empty-state">No monitor events yet.</div>
+      </article>
+    </section>
+  </main>
+
+  <div id="alertModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div id="modalCard" class="modal-card">
+      <div id="modalIcon" class="modal-icon">!</div><p id="modalEyebrow" class="eyebrow">MODEL ALERT</p>
+      <h2 id="modalTitle">Alert</h2><p id="modalMessage"></p><div id="modalMeta" class="modal-meta"></div>
+      <button id="acknowledgeButton" type="button">Acknowledge</button>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+  <script src="/live.js"></script>
+</body>
+</html>
+

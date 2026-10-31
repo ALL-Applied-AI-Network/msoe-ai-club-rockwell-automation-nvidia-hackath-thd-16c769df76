@@ -44,6 +44,8 @@ The team selected Fluid Mixing Station 3 and focused on carryover: residual liqu
 - Added a live `latest_frame` camera panel with model and color-rule overlays.
 - Added 20 ms folder polling with file-stability checks for a 30 fps camera folder.
 - Replayed the corrected Dataset 5 recording through the actual frozen model at original timing and verified the live dashboard end to end.
+- Split the operator interface into a stable `/demo` saved-run presentation and a separate `/live` CSI testing workspace.
+- Added dashboard recipe entry/CSV import, expected-color calculation, validation, timestamped queue snapshots, and guarded start/pause/resume/stop/realign controls for the advisory monitor only.
 
 ## Deployment boundary and next steps
 
@@ -53,4 +55,5 @@ The team selected Fluid Mixing Station 3 and focused on carryover: residual liqu
 - Calibrate thresholds on a separate real validation set and retain a final untouched test set.
 - Measure camera-to-alert latency and operator usefulness at CSI.
 - Replace the manual queue with a read-only PLC/MES recipe feed for production deployment.
+
 

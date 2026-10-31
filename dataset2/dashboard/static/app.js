@@ -30,6 +30,8 @@ const ui = {
   acknowledge: document.querySelector('#acknowledgeButton'),
 };
 
+const stateEndpoint = document.body.dataset.mode === 'live' ? '/api/live/state' : '/api/state';
+
 let initialized = false;
 let newestEventId = 0;
 let pendingAlerts = [];
@@ -231,7 +233,7 @@ function renderBanner(events) {
 
 async function refresh() {
   try {
-    const response = await fetch('/api/state', { cache: 'no-store' });
+    const response = await fetch(stateEndpoint, { cache: 'no-store' });
     if (response.status === 401) { window.location.assign('/login'); return; }
     if (!response.ok) throw new Error(`status ${response.status}`);
     const state = await response.json();
@@ -259,3 +261,4 @@ ui.acknowledge.addEventListener('click', () => {
 
 refresh();
 setInterval(refresh, 750);
+

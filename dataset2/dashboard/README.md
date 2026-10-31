@@ -1,13 +1,18 @@
 # Carryover operator dashboard
 
-This is a read-only browser interface for `live_monitor.py`. It shows the latest camera frame with the model and color-analysis regions, recipe queue, active vial and recipe, latest neural probability, and recent event timeline. New events produce operator pop-ups:
+This is a token-protected browser interface for `live_monitor.py`. It has two deliberately separate views:
+
+- `/demo` is the stable saved-run presentation view.
+- `/live` is the CSI test view for entering/importing a recipe queue and managing the advisory camera/model monitor.
+
+Both views show the latest camera frame with the model and color-analysis regions, recipe queue, active vial and recipe, latest neural probability, and recent event timeline. New events produce operator pop-ups:
 
 - `PREDICT`: amber future carryover-risk warning
 - `MODEL`: red neural shadow warning
 - `DETECT`: red unexpected-color warning during the pour
 - `CONFIRM`: red confirmed carryover warning
 
-Acknowledging a pop-up only closes it in that browser. The dashboard never writes to the PLC, changes the queue, or changes a model decision.
+Acknowledging a pop-up only closes it in that browser. Live controls can start, pause, resume, realign, and stop the monitor container, but never connect to or operate the PLC or physical line. The physical machine must be controlled separately under CSI procedures.
 
 ## Run it
 
@@ -51,6 +56,25 @@ python3 dashboard/dashboard_server.py \
   --latest-frame /path/to/live/carryover-monitor/latest_frame.jpg
 ```
 
+To enable the `/live` controls, provide one fixed, allowlisted live profile:
+
+```bash
+python3 dashboard/dashboard_server.py \
+  --queue /path/to/saved-demo/queue.csv \
+  --events /path/to/saved-demo/events.jsonl \
+  --neural-log /path/to/saved-demo/neural_predictions.jsonl \
+  --latest-frame /path/to/saved-demo/latest_frame.jpg \
+  --live-root /home/USER/workspace/live/operator-runs \
+  --live-workspace /home/USER/workspace \
+  --live-code-dir /home/USER/workspace/code/PROJECT/dataset2/code \
+  --live-camera-dir /home/USER/workspace/live/camera-jpegs \
+  --live-model /home/USER/workspace/models/carryover/model.ts \
+  --live-tank-colors /home/USER/workspace/models/carryover/tank_colors.npy \
+  --live-image nvcr.io/nvidia/pytorch:25.10-py3
+```
+
+The live page validates vial order, volumes, totals, and recipe IDs; computes expected RGB/hue from the tank calibration; and saves an immutable queue snapshot into each timestamped run folder. `Realign next vial` stops the advisory monitor and starts a new preserved segment aligned to the selected vial.
+
 At 30 fps, three-frame persistence adds roughly 0.1 seconds. Folder ingest,
 model inference, and the dashboard's 750 ms refresh should normally keep an
 alert within about one second of the qualifying camera frames. Actual latency
@@ -79,6 +103,9 @@ Optional expected-color columns from the monitor are also accepted. The monitor 
 ## Security and operating boundary
 
 - Token login is required.
+- State-changing live requests require a same-session control token.
 - The default bind address is localhost.
-- No PLC endpoints or equipment-control actions exist in this server.
+- Monitor commands use a fixed container profile; arbitrary shell commands are not accepted.
+- No PLC endpoints or physical equipment-control actions exist in this server.
 - Model warnings remain advisory and require operator judgment.
+

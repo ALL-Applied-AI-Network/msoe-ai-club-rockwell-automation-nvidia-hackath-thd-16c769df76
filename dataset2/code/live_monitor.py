@@ -216,7 +216,7 @@ def watch_source(folder, poll=0.02):
 
 
 # ---------------------------------------------------------------- main loop
-def run(source, queue, neural=None):
+def run(source, queue, neural=None, start_index=0):
     # Position of each vial inside its recipe batch (1 = first vial after a change)
     pos = []
     for i, q in enumerate(queue):
@@ -225,7 +225,7 @@ def run(source, queue, neural=None):
         else:
             pos.append(pos[-1] + 1)
 
-    state, i = "EMPTY", -1
+    state, i = "EMPTY", start_index - 1
     recent = deque(maxlen=5)          # last few hues of the current vial
     pending = []                      # colored frames seen while EMPTY, not yet a confirmed fill
     end_hue, fill_start, left_at, first_alert = {}, {}, {}, {}
@@ -328,7 +328,7 @@ def run(source, queue, neural=None):
              final_color=color_name(eh), final_hue=eh)
 
         # CONFIRM: this is the 2nd vial of a recipe -> judge the 1st vial against it
-        if pos[i] == 2:
+        if pos[i] == 2 and int(queue[i - 1]["vial"]) in end_hue:
             v1 = int(queue[i - 1]["vial"])
             h1 = end_hue.get(v1, float("nan"))
             d = hue_diff(h1, eh)
@@ -410,6 +410,8 @@ def main():
     ap.add_argument("--model-log", help="JSONL path for per-frame neural predictions")
     ap.add_argument("--tank-colors", default=f"{OUT}/tank_colors.npy",
                     help="optional 3x3 expected-color calibration")
+    ap.add_argument("--start-vial", type=int,
+                    help="assign the next detected fill to this vial (for operator realignment)")
     a = ap.parse_args()
 
     DATA, OUT = a.data_root, a.out_dir
@@ -417,7 +419,15 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     open(LOG, "w").close()                      # start a fresh event log
     queue = load_queue(a.queue)
+    start_index = 0
+    if a.start_vial is not None:
+        matches = [index for index, row in enumerate(queue) if int(row["vial"]) == a.start_vial]
+        if not matches:
+            ap.error(f"--start-vial {a.start_vial} is not present in the queue")
+        start_index = matches[0]
     print(f"Loaded {len(queue)} vials from the queue. Source: {a.source}\n")
+    if start_index:
+        print(f"Operator alignment: next detected fill is vial {int(queue[start_index]['vial'])}.\n")
 
     neural = None
     if a.model:
@@ -443,10 +453,11 @@ def main():
             ap.error("--watch-poll-ms must be greater than zero")
         src = watch_source(a.dir, poll=a.watch_poll_ms / 1000.0)
     try:
-        run(src, queue, neural=neural)
+        run(src, queue, neural=neural, start_index=start_index)
     except KeyboardInterrupt:
         print("\nstopped")
 
 
 if __name__ == "__main__":
     main()
+

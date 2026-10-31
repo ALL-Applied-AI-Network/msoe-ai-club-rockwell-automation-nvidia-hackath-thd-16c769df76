@@ -6,12 +6,16 @@
   <title>Carryover Monitor</title>
   <link rel="stylesheet" href="/style.css">
 </head>
-<body>
+<body data-mode="demo">
   <header class="topbar">
     <div class="brand">
       <div class="brand-mark small">THD</div>
-      <div><span class="eyebrow">CSI FLUID MIXING · STATION 3</span><h1>Carryover Monitor</h1></div>
+      <div><span class="eyebrow">CSI FLUID MIXING · STATION 3</span><h1>Saved Run Demo</h1></div>
     </div>
+    <nav class="mode-nav" aria-label="Dashboard modes">
+      <a class="active" href="/demo">Saved Run Demo</a>
+      <a href="/live">Live CSI Test</a>
+    </nav>
     <div class="topbar-status">
       <span id="connectionDot" class="status-dot waiting"></span>
       <span id="connectionText">Connecting…</span>
@@ -88,3 +92,4 @@
   <script src="/app.js"></script>
 </body>
 </html>
+

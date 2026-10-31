@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Read-only operator dashboard for the carryover shadow monitor.
+"""Operator dashboard for the advisory carryover shadow monitor.
 
 The server reads queue.csv, events.jsonl, neural_predictions.jsonl, and the
-monitor's latest-frame preview. It never writes to the PLC or changes monitor
-decisions. Bind to localhost and use an SSH tunnel for remote viewing.
+monitor's latest-frame preview. Its allowlisted live controls can manage only
+the advisory monitor container and its recipe queue. It never writes to the
+PLC or controls physical equipment. Bind to localhost and use an SSH tunnel.
 """
 
 import argparse
@@ -18,6 +19,8 @@ from http import cookies
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs
+
+from live_control import LiveControlError, LiveRunController, validate_queue
 
 
 HERE = Path(__file__).resolve().parent
@@ -68,7 +71,7 @@ def file_age(path):
     return max(0.0, time.time() - path.stat().st_mtime)
 
 
-def read_frame_state(frame_path):
+def read_frame_state(frame_path, frame_url="/api/latest-frame"):
     metadata_path = frame_path.with_suffix(".json")
     if not frame_path.is_file():
         return {"available": False}
@@ -82,12 +85,12 @@ def read_frame_state(frame_path):
         "available": True,
         "age_seconds": file_age(frame_path),
         "version": frame_path.stat().st_mtime_ns,
-        "url": "/api/latest-frame",
+        "url": frame_url,
     })
     return metadata
 
 
-def build_state(queue_path, events_path, neural_path, frame_path):
+def build_state(queue_path, events_path, neural_path, frame_path, frame_url="/api/latest-frame"):
     queue = read_queue(queue_path)
     events = read_jsonl(events_path)
     neural = read_jsonl(neural_path)
@@ -154,7 +157,7 @@ def build_state(queue_path, events_path, neural_path, frame_path):
         "queue": queue_view,
         "events": events[-100:],
         "latest_neural": last_neural,
-        "frame": read_frame_state(frame_path),
+        "frame": read_frame_state(frame_path, frame_url),
         "counts": {
             "total": len(queue_view),
             "completed": len(completed),
@@ -165,7 +168,7 @@ def build_state(queue_path, events_path, neural_path, frame_path):
 
 
 class DashboardHandler(BaseHTTPRequestHandler):
-    server_version = "CarryoverDashboard/1.0"
+    server_version = "CarryoverDashboard/2.0"
 
     def log_message(self, fmt, *args):
         print(f"[{self.log_date_time_string()}] {fmt % args}")
@@ -189,7 +192,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
         for key, value in (headers or {}).items():
             self.send_header(key, value)
         self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionAbortedError, ConnectionResetError):
+            # Browsers routinely cancel an in-flight poll while navigating or closing.
+            pass
 
     def send_json(self, status, payload):
         self.send_bytes(status, json.dumps(payload).encode("utf-8"), "application/json; charset=utf-8")
@@ -199,6 +206,31 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
         self.send_bytes(200, path.read_bytes(), content_type)
+
+    def read_json_body(self, limit=1_000_000):
+        try:
+            size = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            raise LiveControlError("invalid request size") from None
+        if size < 0 or size > limit:
+            raise LiveControlError("request is too large")
+        try:
+            return json.loads(self.rfile.read(size).decode("utf-8")) if size else {}
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raise LiveControlError("request body must be valid JSON") from None
+
+    def csrf_authorized(self):
+        supplied = self.headers.get("X-CSRF-Token", "")
+        return bool(supplied) and secrets.compare_digest(supplied, self.server.csrf_token)
+
+    def require_live_write_access(self):
+        if not self.authenticated():
+            self.send_json(401, {"error": "authentication required"})
+            return False
+        if not self.csrf_authorized():
+            self.send_json(403, {"error": "invalid control token"})
+            return False
+        return True
 
     def do_GET(self):
         path = self.path.split("?", 1)[0]
@@ -216,11 +248,44 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 ),
             )
             return
+        if path == "/api/live/config":
+            if not self.authenticated():
+                self.send_json(401, {"error": "authentication required"})
+                return
+            self.send_json(200, {
+                "csrf_token": self.server.csrf_token,
+                "control": self.server.live_controller.status(),
+                "queue": self.server.live_controller.load_queue(),
+                "profiles": [{
+                    "id": "live_camera", "name": "CSI live camera",
+                    "description": "Watch the configured camera folder and run the advisory model.",
+                }],
+                "safety": "Starts monitoring only. Does not start or control the PLC or machine.",
+            })
+            return
+        if path == "/api/live/state":
+            if not self.authenticated():
+                self.send_json(401, {"error": "authentication required"})
+                return
+            paths = self.server.live_controller.paths()
+            state = build_state(
+                paths["queue"], paths["events"], paths["neural"], paths["frame"],
+                "/api/live/latest-frame",
+            )
+            state["control"] = self.server.live_controller.status()
+            self.send_json(200, state)
+            return
         if path == "/api/latest-frame":
             if not self.authenticated():
                 self.send_json(401, {"error": "authentication required"})
                 return
             self.serve_file(self.server.frame_path, "image/jpeg")
+            return
+        if path == "/api/live/latest-frame":
+            if not self.authenticated():
+                self.send_json(401, {"error": "authentication required"})
+                return
+            self.serve_file(self.server.live_controller.paths()["frame"], "image/jpeg")
             return
         if path == "/healthz":
             self.send_json(200, {"status": "ok"})
@@ -228,35 +293,76 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if path == "/app.js":
             self.serve_file(STATIC / "app.js", "text/javascript; charset=utf-8")
             return
+        if path == "/live.js":
+            self.serve_file(STATIC / "live.js", "text/javascript; charset=utf-8")
+            return
         if path == "/style.css":
             self.serve_file(STATIC / "style.css", "text/css; charset=utf-8")
             return
-        if path == "/" and self.authenticated():
+        if path in {"/", "/demo"} and self.authenticated():
             self.serve_file(STATIC / "index.html", "text/html; charset=utf-8")
             return
-        if path in {"/", "/login"}:
+        if path == "/live" and self.authenticated():
+            self.serve_file(STATIC / "live.html", "text/html; charset=utf-8")
+            return
+        if path in {"/", "/login", "/demo", "/live"}:
             self.serve_file(STATIC / "login.html", "text/html; charset=utf-8")
             return
         self.send_error(404)
 
     def do_POST(self):
         path = self.path.split("?", 1)[0]
-        if path != "/login":
+        if path == "/login":
+            try:
+                size = min(int(self.headers.get("Content-Length", "0")), 4096)
+            except ValueError:
+                size = 0
+            form = parse_qs(self.rfile.read(size).decode("utf-8", errors="replace"))
+            supplied = form.get("token", [""])[0]
+            if not secrets.compare_digest(supplied, self.server.token):
+                self.send_bytes(401, b"Invalid dashboard token", "text/plain; charset=utf-8")
+                return
+            cookie = (
+                f"{COOKIE_NAME}={self.server.session_key}; Path=/; HttpOnly; SameSite=Strict; Max-Age=43200"
+            )
+            self.send_bytes(303, b"", "text/plain", {"Location": "/demo", "Set-Cookie": cookie})
+            return
+        if not path.startswith("/api/live/"):
             self.send_error(404)
             return
-        try:
-            size = min(int(self.headers.get("Content-Length", "0")), 4096)
-        except ValueError:
-            size = 0
-        form = parse_qs(self.rfile.read(size).decode("utf-8", errors="replace"))
-        supplied = form.get("token", [""])[0]
-        if not secrets.compare_digest(supplied, self.server.token):
-            self.send_bytes(401, b"Invalid dashboard token", "text/plain; charset=utf-8")
+        if not self.require_live_write_access():
             return
-        cookie = (
-            f"{COOKIE_NAME}={self.server.session_key}; Path=/; HttpOnly; SameSite=Strict; Max-Age=43200"
-        )
-        self.send_bytes(303, b"", "text/plain", {"Location": "/", "Set-Cookie": cookie})
+        try:
+            payload = self.read_json_body()
+            controller = self.server.live_controller
+            if path == "/api/live/queue/validate":
+                result = validate_queue(payload.get("rows"), controller.tank_colors)
+                self.send_json(200, {"valid": True, "rows": result})
+            elif path == "/api/live/queue":
+                result = controller.save_queue(payload.get("rows"))
+                self.send_json(200, {"saved": True, "rows": result, "control": controller.status()})
+            elif path == "/api/live/start":
+                if payload.get("profile") != "live_camera":
+                    raise LiveControlError("only the predefined live_camera profile is allowed")
+                if payload.get("confirmed") is not True:
+                    raise LiveControlError("operator confirmation is required")
+                self.send_json(200, controller.start(start_vial=payload.get("start_vial")))
+            elif path == "/api/live/stop":
+                if payload.get("confirmed") is not True:
+                    raise LiveControlError("operator confirmation is required")
+                self.send_json(200, controller.stop())
+            elif path == "/api/live/pause":
+                self.send_json(200, controller.pause())
+            elif path == "/api/live/resume":
+                self.send_json(200, controller.resume())
+            elif path == "/api/live/realign":
+                if payload.get("confirmed") is not True:
+                    raise LiveControlError("operator confirmation is required")
+                self.send_json(200, controller.realign(payload.get("start_vial")))
+            else:
+                self.send_error(404)
+        except LiveControlError as error:
+            self.send_json(409, {"error": str(error)})
 
 
 def main():
@@ -271,12 +377,21 @@ def main():
     parser.add_argument("--host", default="127.0.0.1", help="bind address; localhost is safest")
     parser.add_argument("--port", type=int, default=20400)
     parser.add_argument("--token", default=os.environ.get("CARRYOVER_DASH_TOKEN"))
+    parser.add_argument("--live-root", help="root for queue drafts, run outputs, and audit logs")
+    parser.add_argument("--live-workspace", default=os.environ.get("CARRYOVER_WORKSPACE", str(Path.home() / "workspace")))
+    parser.add_argument("--live-code-dir", help="folder containing live_monitor.py")
+    parser.add_argument("--live-camera-dir", help="allowlisted CSI camera JPEG folder")
+    parser.add_argument("--live-model", help="allowlisted TorchScript model.ts")
+    parser.add_argument("--live-tank-colors", help="allowlisted 3x3 tank_colors.npy")
+    parser.add_argument("--live-image", default=os.environ.get("CARRYOVER_IMAGE", "nvcr.io/nvidia/pytorch:25.10-py3"))
+    parser.add_argument("--live-container-name", default="carryover-live-monitor")
     args = parser.parse_args()
 
     token = args.token or secrets.token_urlsafe(18)
     server = ThreadingHTTPServer((args.host, args.port), DashboardHandler)
     server.token = token
     server.session_key = hashlib.sha256((token + secrets.token_hex(16)).encode()).hexdigest()
+    server.csrf_token = secrets.token_urlsafe(24)
     server.queue_path = Path(args.queue).resolve()
     server.events_path = Path(args.events).resolve()
     server.neural_path = Path(args.neural_log).resolve() if args.neural_log else Path("__missing__")
@@ -284,9 +399,20 @@ def main():
         Path(args.latest_frame).resolve()
         if args.latest_frame else server.events_path.with_name("latest_frame.jpg")
     )
+    live_root = Path(args.live_root).resolve() if args.live_root else server.events_path.parent / "live_control"
+    server.live_controller = LiveRunController(
+        live_root=live_root,
+        workspace=args.live_workspace,
+        code_dir=args.live_code_dir or HERE.parent / "code",
+        camera_dir=args.live_camera_dir,
+        model_path=args.live_model,
+        tank_colors_path=args.live_tank_colors,
+        image=args.live_image,
+        container_name=args.live_container_name,
+    )
     print(f"Dashboard: http://{args.host}:{args.port}")
     print(f"Login token: {token}")
-    print("Read-only advisory display. No PLC controls are exposed.")
+    print("Advisory monitor only. Live controls do not connect to or control the PLC.")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -297,3 +423,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
