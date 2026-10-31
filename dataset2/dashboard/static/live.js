@@ -48,7 +48,7 @@ function renderEditor() {
       ${['vial', 'recipe_id', 't100_ml', 't200_ml', 't400_ml', 'total_ml'].map(field => `
         <td><input data-field="${field}" type="number" min="0" step="${field.includes('_ml') ? '0.1' : '1'}" value="${html(row[field] ?? '')}" aria-label="${field} row ${index + 1}"></td>
       `).join('')}
-      <td><span class="color-preview"><i style="background:${html(row.expected_hex || '#2b3b38')}"></i><b>${html(row.expected_hex || 'auto')}</b></span>${row.transition_risk && row.transition_risk !== '—' ? `<small class="queue-risk ${html(row.transition_risk.toLowerCase())}">${html(row.transition_risk)}</small>` : ''}</td>
+      <td><span class="color-preview"><i style="background:${html(row.expected_hex || '#2b3b38')}"></i><b>${html(row.expected_hex || 'auto')}${row.expected_hue !== undefined && row.expected_hue !== '' ? ` · H${html(Math.round(Number(row.expected_hue)))}` : ''}</b></span>${row.transition_risk && row.transition_risk !== '—' ? `<small class="queue-risk ${html(row.transition_risk.toLowerCase())}">${html(row.transition_risk)}</small>` : ''}</td>
       <td><button class="icon-button remove-row" type="button" aria-label="Remove row ${index + 1}">×</button></td>
     </tr>`).join('');
   liveUi.body.querySelectorAll('input').forEach(input => input.addEventListener('input', event => {
