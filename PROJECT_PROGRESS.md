@@ -46,6 +46,7 @@ The team selected Fluid Mixing Station 3 and focused on carryover: residual liqu
 - Replayed the corrected Dataset 5 recording through the actual frozen model at original timing and verified the live dashboard end to end.
 - Split the operator interface into a stable `/demo` saved-run presentation and a separate `/live` CSI testing workspace.
 - Added dashboard recipe entry/CSV import, expected-color calculation, validation, timestamped queue snapshots, and guarded start/pause/resume/stop/realign controls for the advisory monitor only.
+- Deployed the split-view dashboard beside v2 on Spark localhost port 20401 and verified both views through an independent SSH tunnel; the preserved port-20400 presentation was not changed.
 
 ## Deployment boundary and next steps
 
