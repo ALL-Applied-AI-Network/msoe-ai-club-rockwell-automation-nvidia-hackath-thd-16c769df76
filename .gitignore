@@ -1,0 +1,28 @@
+__pycache__/
+*.py[cod]
+*.log
+.DS_Store
+Thumbs.db
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Raw datasets and generated run outputs stay outside Git.
+data/
+raw/
+outputs/
+runs/
+live/
+dashboard-archives/
+
+# Model weights are reproducible but intentionally not committed.
+*.pt
+*.pth
+*.onnx
+*.ts
+

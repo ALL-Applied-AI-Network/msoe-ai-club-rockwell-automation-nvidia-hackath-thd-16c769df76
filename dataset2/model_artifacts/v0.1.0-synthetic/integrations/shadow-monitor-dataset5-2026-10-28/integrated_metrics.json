@@ -1,0 +1,23 @@
+{
+  "threshold": 0.0265,
+  "persistence": "3 of last 5 visible frames",
+  "tp": 6,
+  "fp": 2,
+  "fn": 1,
+  "tn": 14,
+  "recall": 0.8571428571428571,
+  "specificity": 0.875,
+  "precision": 0.75,
+  "accuracy": 0.8695652173913043,
+  "missed_positive_vials": [
+    13
+  ],
+  "false_alarm_vials": [
+    6,
+    12
+  ],
+  "neural_frames": 529,
+  "latency_mean_ms": 4.309175394753624,
+  "latency_p95_ms": 5.345056997612119,
+  "rule_confirmed_first_vials": 7
+}

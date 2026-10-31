@@ -1,0 +1,74 @@
+{"time": "2026-09-23T19:47:13.645810", "kind": "INFO", "vial": 1, "message": "fill started at 19:47:09, recipe 5"}
+{"time": "2026-09-23T19:47:13.645810", "kind": "MODEL", "vial": 1, "message": "shadow alert: 3/3 recent frames >= 0.0265; smoothed probability 0.0835; mild indicated. Advisory only\u2014no PLC action.", "probability": 0.08345626791318257, "threshold": 0.0265, "severity": "mild", "advisory_only": true}
+{"time": "2026-09-23T19:47:45.789251", "kind": "INFO", "vial": 1, "message": "left the station, final color green (hue 97)"}
+{"time": "2026-09-23T19:48:11.943591", "kind": "INFO", "vial": 2, "message": "fill started at 19:48:07, recipe 5"}
+{"time": "2026-09-23T19:48:42.099892", "kind": "INFO", "vial": 2, "message": "left the station, final color green (hue 98)"}
+{"time": "2026-09-23T19:48:42.099892", "kind": "OK", "vial": 1, "message": "matches its batch (diff 1), no carryover", "diff": 1.0}
+{"time": "2026-09-23T19:49:08.249761", "kind": "INFO", "vial": 3, "message": "fill started at 19:49:04, recipe 5"}
+{"time": "2026-09-23T19:49:38.409463", "kind": "INFO", "vial": 3, "message": "left the station, final color olive/yellow (hue 52)"}
+{"time": "2026-09-23T19:49:38.409463", "kind": "PREDICT", "vial": 4, "message": "recipe 5 -> 6, change score 0.42: HIGH carryover risk. Flush first, or plan to divert vial 4.", "score": 0.41666666666666663, "level": "HIGH"}
+{"time": "2026-09-23T19:50:04.530476", "kind": "INFO", "vial": 4, "message": "fill started at 19:50:00, recipe 6 (warned 22 s before the fill started)"}
+{"time": "2026-09-23T19:50:08.544234", "kind": "MODEL", "vial": 4, "message": "shadow alert: 3/5 recent frames >= 0.0265; smoothed probability 0.0403; mild indicated. Advisory only\u2014no PLC action.", "probability": 0.04033785065015157, "threshold": 0.0265, "severity": "mild", "advisory_only": true}
+{"time": "2026-09-23T19:50:28.642160", "kind": "INFO", "vial": 4, "message": "left the station, final color olive/yellow (hue 50)"}
+{"time": "2026-09-23T19:50:54.776836", "kind": "INFO", "vial": 5, "message": "fill started at 19:50:50, recipe 6"}
+{"time": "2026-09-23T19:51:20.905901", "kind": "INFO", "vial": 5, "message": "left the station, final color orange (hue 20)"}
+{"time": "2026-09-23T19:51:20.905901", "kind": "CONFIRM", "vial": 4, "message": "carryover confirmed: olive/yellow vs batch color orange (diff 30). Divert/scrap vial 4 before capping.", "diff": 30.0}
+{"time": "2026-09-23T19:51:47.058148", "kind": "INFO", "vial": 6, "message": "fill started at 19:51:43, recipe 6"}
+{"time": "2026-09-23T19:51:49.066755", "kind": "MODEL", "vial": 6, "message": "shadow alert: 3/4 recent frames >= 0.0265; smoothed probability 0.0305; clean indicated. Advisory only\u2014no PLC action.", "probability": 0.030486317351460457, "threshold": 0.0265, "severity": "clean", "advisory_only": true}
+{"time": "2026-09-23T19:52:13.218746", "kind": "INFO", "vial": 6, "message": "left the station, final color orange (hue 16)"}
+{"time": "2026-09-23T19:52:13.218746", "kind": "PREDICT", "vial": 7, "message": "recipe 6 -> 7, change score 0.71: HIGH carryover risk. Flush first, or plan to divert vial 7.", "score": 0.7142857142857143, "level": "HIGH"}
+{"time": "2026-09-23T19:53:01.502830", "kind": "INFO", "vial": 7, "message": "fill started at 19:52:57, recipe 7 (warned 44 s before the fill started)"}
+{"time": "2026-09-23T19:53:01.502830", "kind": "DETECT", "vial": 7, "message": "orange liquid seen, but recipe 7 uses no T-200 (orange): carryover in progress", "hue": 18.0}
+{"time": "2026-09-23T19:53:01.502830", "kind": "MODEL", "vial": 7, "message": "shadow alert: 3/3 recent frames >= 0.0265; smoothed probability 0.0790; clean indicated. Advisory only\u2014no PLC action.", "probability": 0.07898722340663274, "threshold": 0.0265, "severity": "clean", "advisory_only": true}
+{"time": "2026-09-23T19:53:27.667910", "kind": "INFO", "vial": 7, "message": "left the station, final color olive/yellow (hue 56)"}
+{"time": "2026-09-23T19:54:07.905610", "kind": "INFO", "vial": 8, "message": "fill started at 19:54:03, recipe 7"}
+{"time": "2026-09-23T19:54:32.034496", "kind": "INFO", "vial": 8, "message": "left the station, final color blue (hue 140)"}
+{"time": "2026-09-23T19:54:32.034496", "kind": "CONFIRM", "vial": 7, "message": "carryover confirmed: olive/yellow vs batch color blue (diff 84). Divert/scrap vial 7 before capping.", "diff": 84.0}
+{"time": "2026-09-23T19:55:12.305065", "kind": "INFO", "vial": 9, "message": "fill started at 19:55:08, recipe 7"}
+{"time": "2026-09-23T19:55:38.460954", "kind": "INFO", "vial": 9, "message": "left the station, final color blue (hue 141)"}
+{"time": "2026-09-23T19:55:38.460954", "kind": "PREDICT", "vial": 10, "message": "recipe 7 -> 8, change score 0.38: MEDIUM carryover risk. Consider a flush; vial 10 will be checked closely.", "score": 0.38095238095238093, "level": "MEDIUM"}
+{"time": "2026-09-23T19:56:06.614443", "kind": "INFO", "vial": 10, "message": "fill started at 19:56:02, recipe 8 (warned 24 s before the fill started)"}
+{"time": "2026-09-23T19:56:10.634945", "kind": "MODEL", "vial": 10, "message": "shadow alert: 3/5 recent frames >= 0.0265; smoothed probability 0.0343; clean indicated. Advisory only\u2014no PLC action.", "probability": 0.03427888390918573, "threshold": 0.0265, "severity": "clean", "advisory_only": true}
+{"time": "2026-09-23T19:56:46.845916", "kind": "INFO", "vial": 10, "message": "left the station, final color blue (hue 138)"}
+{"time": "2026-09-23T19:57:15.014666", "kind": "INFO", "vial": 11, "message": "fill started at 19:57:10, recipe 8"}
+{"time": "2026-09-23T19:57:55.258136", "kind": "INFO", "vial": 11, "message": "left the station, final color teal (hue 105)"}
+{"time": "2026-09-23T19:57:55.258136", "kind": "CONFIRM", "vial": 10, "message": "carryover confirmed: blue vs batch color teal (diff 32). Divert/scrap vial 10 before capping.", "diff": 32.5}
+{"time": "2026-09-23T19:58:23.426935", "kind": "INFO", "vial": 12, "message": "fill started at 19:58:19, recipe 8"}
+{"time": "2026-09-23T19:58:23.426935", "kind": "MODEL", "vial": 12, "message": "shadow alert: 3/3 recent frames >= 0.0265; smoothed probability 0.0632; mild indicated. Advisory only\u2014no PLC action.", "probability": 0.06315211827556293, "threshold": 0.0265, "severity": "mild", "advisory_only": true}
+{"time": "2026-09-23T19:59:07.647264", "kind": "INFO", "vial": 12, "message": "left the station, final color green (hue 86)"}
+{"time": "2026-09-23T19:59:07.647264", "kind": "PREDICT", "vial": 13, "message": "recipe 8 -> 9, change score 0.21: LOW carryover risk. Small change; vial 13 will still be checked.", "score": 0.20833333333333334, "level": "LOW"}
+{"time": "2026-09-23T19:59:37.803514", "kind": "INFO", "vial": 13, "message": "fill started at 19:59:33, recipe 9 (warned 26 s before the fill started)"}
+{"time": "2026-09-23T20:00:34.151735", "kind": "INFO", "vial": 13, "message": "left the station, final color olive/yellow (hue 56)"}
+{"time": "2026-09-23T20:01:04.324720", "kind": "INFO", "vial": 14, "message": "fill started at 20:01:00, recipe 9"}
+{"time": "2026-09-23T20:01:56.627982", "kind": "INFO", "vial": 14, "message": "left the station, final color green (hue 71)"}
+{"time": "2026-09-23T20:01:56.627982", "kind": "CONFIRM", "vial": 13, "message": "carryover confirmed: olive/yellow vs batch color green (diff 16). Divert/scrap vial 13 before capping.", "diff": 15.75}
+{"time": "2026-09-23T20:02:28.806412", "kind": "INFO", "vial": 15, "message": "fill started at 20:02:24, recipe 9"}
+{"time": "2026-09-23T20:03:11.051980", "kind": "INFO", "vial": 15, "message": "left the station, final color green (hue 100)"}
+{"time": "2026-09-23T20:03:11.051980", "kind": "PREDICT", "vial": 16, "message": "recipe 9 -> 10, change score 0.47: HIGH carryover risk. Flush first, or plan to divert vial 16.", "score": 0.475, "level": "HIGH"}
+{"time": "2026-09-23T20:03:51.305326", "kind": "INFO", "vial": 16, "message": "fill started at 20:03:47, recipe 10 (warned 36 s before the fill started)"}
+{"time": "2026-09-23T20:03:53.310201", "kind": "MODEL", "vial": 16, "message": "shadow alert: 3/4 recent frames >= 0.0265; smoothed probability 0.0348; mild indicated. Advisory only\u2014no PLC action.", "probability": 0.03481933909157912, "threshold": 0.0265, "severity": "mild", "advisory_only": true}
+{"time": "2026-09-23T20:04:27.510694", "kind": "INFO", "vial": 16, "message": "left the station, final color teal (hue 112)"}
+{"time": "2026-09-23T20:05:01.712104", "kind": "INFO", "vial": 17, "message": "fill started at 20:04:57, recipe 10"}
+{"time": "2026-09-23T20:05:45.954252", "kind": "INFO", "vial": 17, "message": "left the station, final color olive/yellow (hue 39)"}
+{"time": "2026-09-23T20:05:45.954252", "kind": "CONFIRM", "vial": 16, "message": "carryover confirmed: teal vs batch color olive/yellow (diff 73). Divert/scrap vial 16 before capping.", "diff": 73.0}
+{"time": "2026-09-23T20:06:12.098103", "kind": "INFO", "vial": 18, "message": "fill started at 20:06:08, recipe 10"}
+{"time": "2026-09-23T20:06:54.311275", "kind": "INFO", "vial": 18, "message": "left the station, final color olive/yellow (hue 38)"}
+{"time": "2026-09-23T20:06:54.311275", "kind": "PREDICT", "vial": 19, "message": "recipe 10 -> 11, change score 0.51: HIGH carryover risk. Flush first, or plan to divert vial 19.", "score": 0.5142857142857142, "level": "HIGH"}
+{"time": "2026-09-23T20:07:20.483814", "kind": "INFO", "vial": 19, "message": "fill started at 20:07:16, recipe 11 (warned 22 s before the fill started)"}
+{"time": "2026-09-23T20:07:20.483814", "kind": "MODEL", "vial": 19, "message": "shadow alert: 3/3 recent frames >= 0.0265; smoothed probability 0.0831; mild indicated. Advisory only\u2014no PLC action.", "probability": 0.08305362487832706, "threshold": 0.0265, "severity": "mild", "advisory_only": true}
+{"time": "2026-09-23T20:08:08.783334", "kind": "INFO", "vial": 19, "message": "left the station, final color green (hue 76)"}
+{"time": "2026-09-23T20:08:34.915927", "kind": "INFO", "vial": 20, "message": "fill started at 20:08:30, recipe 11"}
+{"time": "2026-09-23T20:09:23.179858", "kind": "INFO", "vial": 20, "message": "left the station, final color teal (hue 124)"}
+{"time": "2026-09-23T20:09:23.179858", "kind": "CONFIRM", "vial": 19, "message": "carryover confirmed: green vs batch color teal (diff 48). Divert/scrap vial 19 before capping.", "diff": 48.5}
+{"time": "2026-09-23T20:09:47.308112", "kind": "INFO", "vial": 21, "message": "fill started at 20:09:43, recipe 11"}
+{"time": "2026-09-23T20:10:37.640228", "kind": "INFO", "vial": 21, "message": "left the station, final color teal (hue 125)"}
+{"time": "2026-09-23T20:10:37.640228", "kind": "PREDICT", "vial": 22, "message": "recipe 11 -> 12, change score 0.57: HIGH carryover risk. Flush first, or plan to divert vial 22.", "score": 0.5714285714285714, "level": "HIGH"}
+{"time": "2026-09-23T20:11:09.805221", "kind": "INFO", "vial": 22, "message": "fill started at 20:11:05, recipe 12 (warned 28 s before the fill started)"}
+{"time": "2026-09-23T20:11:09.805221", "kind": "MODEL", "vial": 22, "message": "shadow alert: 3/3 recent frames >= 0.0265; smoothed probability 0.0650; mild indicated. Advisory only\u2014no PLC action.", "probability": 0.06504411747058232, "threshold": 0.0265, "severity": "mild", "advisory_only": true}
+{"time": "2026-09-23T20:11:56.038795", "kind": "INFO", "vial": 22, "message": "left the station, final color teal (hue 102)"}
+{"time": "2026-09-23T20:12:30.207283", "kind": "INFO", "vial": 23, "message": "fill started at 20:12:26, recipe 12"}
+{"time": "2026-09-23T20:13:22.484839", "kind": "INFO", "vial": 23, "message": "left the station, final color orange (hue 17)"}
+{"time": "2026-09-23T20:13:22.484839", "kind": "CONFIRM", "vial": 22, "message": "carryover confirmed: teal vs batch color orange (diff 85). Divert/scrap vial 22 before capping.", "diff": 85.0}
+{"time": "2026-09-23T20:13:28.504510", "kind": "INFO", "vial": 24, "message": "fill started at 20:13:24, recipe 12"}
+{"time": "2026-09-23T20:14:46.917753", "kind": "INFO", "vial": 24, "message": "left the station, final color orange (hue 14)"}
+{"time": "2026-09-23T20:15:21.112435", "kind": "INFO", "vial": "?", "message": "a fill started but the queue has no more vials; stopping"}

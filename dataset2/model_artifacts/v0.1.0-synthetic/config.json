@@ -1,0 +1,43 @@
+{
+  "dataset_root": "/job/in/dataset",
+  "output_dir": "/job/out/experiment_v3",
+  "cache_dir": "/job/cache",
+  "epochs": 15,
+  "batch_size": 64,
+  "workers": 0,
+  "learning_rate": 0.0003,
+  "weight_decay": 0.0001,
+  "queue_dropout": 0.15,
+  "image_size": 160,
+  "max_scenarios_per_split": null,
+  "seed": 20261028,
+  "patience": 10,
+  "dataset_ready": {
+    "version": "v4.0.0",
+    "status": "ready",
+    "created_at": "2026-10-28T06:00:02.606874+00:00",
+    "scenarios": 480,
+    "frame_rows": 329280,
+    "total_bytes": 2277264997,
+    "vial_manifest_sha256": "84d513802332cd41a4b6ff72ad45164a798aefbe6cf1b67905c754ca4de714d1",
+    "frame_labels_sha256": "7677e3a89260d87e099e8ecca7fec544abf03984fd7d7ebdfe39c60b4f02d24f",
+    "checksums_sha256": "d8d61e53d0d36446b3aa778614eac41280a15640895938ddc5ab08463f5d478b"
+  },
+  "vial_manifest_sha256": "84d513802332cd41a4b6ff72ad45164a798aefbe6cf1b67905c754ca4de714d1",
+  "recipe_features": [
+    "previous_t100_fraction",
+    "previous_t200_fraction",
+    "previous_t400_fraction",
+    "current_t100_fraction",
+    "current_t200_fraction",
+    "current_t400_fraction",
+    "expected_r",
+    "expected_g",
+    "expected_b",
+    "queue_confidence"
+  ],
+  "device": "cuda",
+  "scenario_aggregation": "mean of top 3 visible-frame probabilities",
+  "checkpoint_selection": "frame observed balanced accuracy + 0.50 scenario severity accuracy + 0.20 scenario risk accuracy",
+  "created_at": "2026-10-28T22:30:05.487951+00:00"
+}

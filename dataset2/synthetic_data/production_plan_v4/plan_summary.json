@@ -1,0 +1,31 @@
+{
+  "dataset_version": "v4.0.0",
+  "status": "frozen",
+  "scenarios": 480,
+  "classes": {
+    "clean": 240,
+    "mild": 80,
+    "medium": 80,
+    "severe": 80
+  },
+  "splits": {
+    "train": 320,
+    "validation": 80,
+    "test": 80
+  },
+  "palettes": 12,
+  "recipes": 24,
+  "transitions": 60,
+  "shards": {
+    "shard_00": 60,
+    "shard_01": 60,
+    "shard_02": 60,
+    "shard_03": 60,
+    "shard_04": 60,
+    "shard_05": 60,
+    "shard_06": 60,
+    "shard_07": 60
+  },
+  "transition_leakage": false,
+  "palette_leakage": false
+}

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carryover Monitor · Sign in</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="login-body">
+  <main class="login-card">
+    <div class="brand-mark">THD</div>
+    <p class="eyebrow">CSI FLUID MIXING · STATION 3</p>
+    <h1>Carryover Monitor</h1>
+    <p class="muted">Operator dashboard · advisory only</p>
+    <form method="post" action="/login">
+      <label for="token">Dashboard token</label>
+      <input id="token" name="token" type="password" autocomplete="current-password" required autofocus>
+      <button type="submit">Open dashboard</button>
+    </form>
+    <p class="security-note">The token is printed in the dashboard server terminal.</p>
+  </main>
+</body>
+</html>

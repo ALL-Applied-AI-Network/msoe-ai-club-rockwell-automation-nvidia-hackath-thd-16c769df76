@@ -1,0 +1,10 @@
+{
+  "mode": "advisory_only",
+  "model_version": "v0.1.0-synthetic",
+  "threshold": 0.0265,
+  "window_visible_frames": 5,
+  "required_frames_at_or_above_threshold": 3,
+  "automatic_plc_action": false,
+  "calibration_basis": "Corrected Dataset 5 replay; provisional and selected after development review",
+  "required_next_validation": "Untouched CSI hardware runs"
+}

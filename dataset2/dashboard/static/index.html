@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carryover Monitor</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark small">THD</div>
+      <div><span class="eyebrow">CSI FLUID MIXING · STATION 3</span><h1>Carryover Monitor</h1></div>
+    </div>
+    <div class="topbar-status">
+      <span id="connectionDot" class="status-dot waiting"></span>
+      <span id="connectionText">Connecting…</span>
+      <span class="advisory-pill">ADVISORY ONLY</span>
+    </div>
+  </header>
+
+  <main class="dashboard-shell">
+    <section id="alertBanner" class="alert-banner hidden" aria-live="assertive"></section>
+
+    <section class="hero-grid">
+      <article class="panel camera-panel">
+        <div class="section-heading">
+          <span>Live camera</span>
+          <span id="frameStatus" class="camera-status waiting">Waiting for frame</span>
+        </div>
+        <div id="frameShell" class="frame-shell empty">
+          <img id="liveFrame" alt="Latest vial-fill camera frame" decoding="async">
+          <div id="modelRoi" class="roi-overlay model-roi"><span>MODEL ROI</span></div>
+          <div id="ruleRoi" class="roi-overlay rule-roi"><span>COLOR ROI</span></div>
+          <div id="framePlaceholder" class="frame-placeholder">No camera frame published yet</div>
+        </div>
+        <div class="camera-meta">
+          <div><span>Captured</span><strong id="frameCaptured">—</strong></div>
+          <div><span>Frame age</span><strong id="frameAge">—</strong></div>
+          <div class="camera-source"><span>Source</span><strong id="frameSource">—</strong></div>
+        </div>
+      </article>
+      <article class="panel current-panel">
+        <div class="section-heading"><span>Current operation</span><span id="currentStatus" class="status-chip">Waiting</span></div>
+        <div id="currentRecipe" class="current-recipe empty-state">Waiting for a recipe queue…</div>
+      </article>
+      <article class="panel signal-panel">
+        <div class="section-heading"><span>Live model signal</span><span class="live-dot"></span></div>
+        <div class="probability-wrap">
+          <div><strong id="probabilityValue">—</strong><span>observed defect probability</span></div>
+          <div class="meter"><div id="probabilityBar"></div><i id="thresholdMarker"></i></div>
+        </div>
+        <div id="modelDetails" class="model-details">Waiting for neural predictions.</div>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <article class="panel queue-panel">
+        <div class="section-heading">
+          <span>Recipe queue</span>
+          <span id="queueSummary" class="muted">0 recipes</span>
+        </div>
+        <div class="queue-table-wrap">
+          <table>
+            <thead><tr><th>Vial</th><th>Recipe</th><th>Composition</th><th>Status</th><th>Risk</th></tr></thead>
+            <tbody id="queueBody"></tbody>
+          </table>
+        </div>
+      </article>
+      <article class="panel events-panel">
+        <div class="section-heading"><span>Event timeline</span><span id="eventCount" class="muted">0 events</span></div>
+        <div id="eventsList" class="events-list empty-state">No monitor events yet.</div>
+      </article>
+    </section>
+  </main>
+
+  <div id="alertModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div id="modalCard" class="modal-card">
+      <div id="modalIcon" class="modal-icon">!</div>
+      <p id="modalEyebrow" class="eyebrow">MODEL ALERT</p>
+      <h2 id="modalTitle">Alert</h2>
+      <p id="modalMessage"></p>
+      <div id="modalMeta" class="modal-meta"></div>
+      <button id="acknowledgeButton" type="button">Acknowledge</button>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

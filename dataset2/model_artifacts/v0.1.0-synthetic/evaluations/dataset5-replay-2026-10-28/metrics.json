@@ -1,0 +1,77 @@
+{
+  "status": "complete",
+  "created_at": "2026-10-29T02:22:58.011958+00:00",
+  "model_sha256": "f492763a91b9ca76bf03164d5ac8b678294e83513f77b03c5b2e591f0c76b2f5",
+  "labels_sha256": "4ac69d3f99da53064979327d52d848fb6de133fe7b015dd06400a1ab0a83642c",
+  "timeline_sha256": "05fc83cd6048b310610e65adfac539f61d1f7ee97c98096f32ce9d569081f174",
+  "device": "cuda",
+  "scored_vials": 23,
+  "positive_vials": 7,
+  "negative_vials": 16,
+  "replay_frames": 245,
+  "fixed_synthetic_threshold": {
+    "threshold": 0.5,
+    "tp": 0,
+    "fp": 0,
+    "fn": 7,
+    "tn": 16,
+    "precision": 0.0,
+    "recall": 0.0,
+    "specificity": 1.0,
+    "f1": 0.0,
+    "accuracy": 0.6956521739130435,
+    "balanced_accuracy": 0.5
+  },
+  "roc_auc": 0.7857142857142857,
+  "post_hoc_best_threshold_do_not_treat_as_test_accuracy": {
+    "threshold": 0.007114871637895703,
+    "tp": 7,
+    "fp": 6,
+    "fn": 0,
+    "tn": 10,
+    "precision": 0.5384615384615384,
+    "recall": 1.0,
+    "specificity": 0.625,
+    "f1": 0.7000000000000001,
+    "accuracy": 0.7391304347826086,
+    "balanced_accuracy": 0.8125
+  },
+  "leave_one_recipe_out_threshold_calibration": {
+    "tp": 7,
+    "fp": 6,
+    "fn": 0,
+    "tn": 10,
+    "precision": 0.5384615384615384,
+    "recall": 1.0,
+    "specificity": 0.625,
+    "f1": 0.7000000000000001,
+    "accuracy": 0.7391304347826086,
+    "balanced_accuracy": 0.8125,
+    "thresholds_by_held_recipe": {
+      "5": 0.007114871637895703,
+      "6": 0.007114871637895703,
+      "7": 0.007114871637895703,
+      "8": 0.007937650429084897,
+      "9": 0.007114871637895703,
+      "10": 0.007114871637895703,
+      "11": 0.007114871637895703,
+      "12": 0.006019720497230688
+    },
+    "method": "Each held recipe is scored using a threshold selected from all other recipes only."
+  },
+  "risk_tier_consistency_with_recipe_rule": 0.5652173913043478,
+  "latency_ms": {
+    "mean": 4.403496141146336,
+    "median": 4.014462931081653,
+    "p95": 5.234807124361396,
+    "max": 61.1319812014699,
+    "end_to_end_fps_from_mean": 227.092284845213
+  },
+  "limitations": [
+    "Dataset 5 ground truth is expected carryover by batch position, not an independent laboratory assay.",
+    "Expected RGB uses existing leave-one-recipe-out calibration from other Dataset 5 recipes.",
+    "Dataset 5 has no reviewed severity labels, so severity predictions are not scored.",
+    "The post-hoc threshold is descriptive only and must not be reported as unbiased test accuracy.",
+    "Leave-one-recipe-out threshold results are cross-validated but remain uncertain because only 23 vials are scored."
+  ]
+}

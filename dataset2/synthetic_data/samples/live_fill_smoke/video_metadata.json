@@ -1,0 +1,15 @@
+{
+  "fps": 30.0,
+  "resolution": [
+    640,
+    480
+  ],
+  "combined_frames": 120,
+  "duration_s": 4.0,
+  "unique_rendered_frames": 120,
+  "animation_frames_per_vial": 120,
+  "idle_frames_per_vial": 0,
+  "per_vial_clips": 1,
+  "renderer": "RayTracedLighting",
+  "subframes": 1
+}

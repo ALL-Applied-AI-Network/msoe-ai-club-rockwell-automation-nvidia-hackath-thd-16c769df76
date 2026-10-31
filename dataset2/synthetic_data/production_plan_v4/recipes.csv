@@ -1,0 +1,25 @@
+recipe_id,t300_ml,t100_ml,t200_ml,t400_ml,total_ml,name
+5,0,10,10,10,30,mixed low even
+6,0,30,10,0,40,pale orange
+7,0,20,0,50,70,pale blue
+8,0,20,20,20,60,even mixture
+9,0,10,35,35,80,dark saturated
+10,0,45,15,15,75,pale wash
+11,0,10,10,50,70,blue dominant
+12,0,10,50,10,70,orange dominant
+13,0,0,50,20,70,orange blue pair
+14,0,60,0,10,70,very pale blue
+15,0,0,10,10,20,small orange blue
+16,0,10,0,10,20,small clear blue
+17,0,10,10,0,20,small clear orange
+18,0,40,10,10,60,dilute balanced
+19,0,10,40,10,60,strong orange
+20,0,10,10,40,60,strong blue
+21,0,0,30,30,60,saturated balanced
+22,0,30,0,30,60,clear blue balanced
+23,0,30,30,0,60,clear orange balanced
+24,0,20,40,20,80,large orange mix
+25,0,20,20,40,80,large blue mix
+26,0,40,20,20,80,large dilute mix
+27,0,0,50,30,80,maximum orange saturated
+28,0,30,0,50,80,maximum blue dilute

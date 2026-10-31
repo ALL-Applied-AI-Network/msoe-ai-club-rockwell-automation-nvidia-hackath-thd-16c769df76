@@ -1,0 +1,2 @@
+vial,recipe_id,t100_ml,t200_ml,t400_ml,total_ml,expected_color,expected_rgb,expected_hex,expected_hue_deg
+1,5,10,10,10,30,mixed - low even,"52,44,50",#342C32,312.86

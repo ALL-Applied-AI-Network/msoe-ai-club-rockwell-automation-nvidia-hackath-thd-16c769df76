@@ -1,0 +1,156 @@
+{
+  "version": "v4.0.0",
+  "scenarios": 480,
+  "frame_rows": 329280,
+  "classes": {
+    "clean": 240,
+    "mild": 80,
+    "medium": 80,
+    "severe": 80
+  },
+  "splits": {
+    "train": 320,
+    "validation": 80,
+    "test": 80
+  },
+  "palettes": {
+    "train_ocean": 40,
+    "train_rust": 40,
+    "train_teal": 40,
+    "train_cyan": 40,
+    "train_soft": 40,
+    "train_coral": 40,
+    "train_base": 40,
+    "train_amber": 40,
+    "validation_gold": 40,
+    "validation_aqua": 40,
+    "test_copper": 40,
+    "test_lagoon": 40
+  },
+  "transitions": 60,
+  "transition_leakage": false,
+  "palette_leakage": false,
+  "shards": [
+    {
+      "shard": "shard_00",
+      "scenarios": 60,
+      "frame_rows": 41160,
+      "failures": 0,
+      "passed": true,
+      "fps": 30.0,
+      "resolution": [
+        640,
+        480
+      ],
+      "frames_per_scenario": 686,
+      "renderer": "RayTracedLighting",
+      "subframes": 1
+    },
+    {
+      "shard": "shard_01",
+      "scenarios": 60,
+      "frame_rows": 41160,
+      "failures": 0,
+      "passed": true,
+      "fps": 30.0,
+      "resolution": [
+        640,
+        480
+      ],
+      "frames_per_scenario": 686,
+      "renderer": "RayTracedLighting",
+      "subframes": 1
+    },
+    {
+      "shard": "shard_02",
+      "scenarios": 60,
+      "frame_rows": 41160,
+      "failures": 0,
+      "passed": true,
+      "fps": 30.0,
+      "resolution": [
+        640,
+        480
+      ],
+      "frames_per_scenario": 686,
+      "renderer": "RayTracedLighting",
+      "subframes": 1
+    },
+    {
+      "shard": "shard_03",
+      "scenarios": 60,
+      "frame_rows": 41160,
+      "failures": 0,
+      "passed": true,
+      "fps": 30.0,
+      "resolution": [
+        640,
+        480
+      ],
+      "frames_per_scenario": 686,
+      "renderer": "RayTracedLighting",
+      "subframes": 1
+    },
+    {
+      "shard": "shard_04",
+      "scenarios": 60,
+      "frame_rows": 41160,
+      "failures": 0,
+      "passed": true,
+      "fps": 30.0,
+      "resolution": [
+        640,
+        480
+      ],
+      "frames_per_scenario": 686,
+      "renderer": "RayTracedLighting",
+      "subframes": 1
+    },
+    {
+      "shard": "shard_05",
+      "scenarios": 60,
+      "frame_rows": 41160,
+      "failures": 0,
+      "passed": true,
+      "fps": 30.0,
+      "resolution": [
+        640,
+        480
+      ],
+      "frames_per_scenario": 686,
+      "renderer": "RayTracedLighting",
+      "subframes": 1
+    },
+    {
+      "shard": "shard_06",
+      "scenarios": 60,
+      "frame_rows": 41160,
+      "failures": 0,
+      "passed": true,
+      "fps": 30.0,
+      "resolution": [
+        640,
+        480
+      ],
+      "frames_per_scenario": 686,
+      "renderer": "RayTracedLighting",
+      "subframes": 1
+    },
+    {
+      "shard": "shard_07",
+      "scenarios": 60,
+      "frame_rows": 41160,
+      "failures": 0,
+      "passed": true,
+      "fps": 30.0,
+      "resolution": [
+        640,
+        480
+      ],
+      "frames_per_scenario": 686,
+      "renderer": "RayTracedLighting",
+      "subframes": 1
+    }
+  ],
+  "all_shards_passed": true
+}

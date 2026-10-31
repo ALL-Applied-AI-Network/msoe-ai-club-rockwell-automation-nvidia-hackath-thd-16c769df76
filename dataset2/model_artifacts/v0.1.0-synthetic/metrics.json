@@ -1,0 +1,639 @@
+{
+  "best_epoch": 15,
+  "validation": {
+    "frame_observed": {
+      "tp": 141,
+      "fp": 320,
+      "fn": 56,
+      "tn": 443,
+      "precision": 0.30585683297180044,
+      "recall": 0.7157360406091371,
+      "specificity": 0.580602883355177,
+      "f1": 0.4285714285714286,
+      "accuracy": 0.6083333333333333,
+      "balanced_accuracy": 0.648169461982157
+    },
+    "scenario_observed": {
+      "tp": 31,
+      "fp": 31,
+      "fn": 9,
+      "tn": 9,
+      "precision": 0.5,
+      "recall": 0.775,
+      "specificity": 0.225,
+      "f1": 0.607843137254902,
+      "accuracy": 0.5,
+      "balanced_accuracy": 0.5
+    },
+    "frame_severity_accuracy": 0.259375,
+    "frame_risk_accuracy": 0.5,
+    "scenario_severity_accuracy": 0.2625,
+    "scenario_risk_accuracy": 0.5,
+    "scenarios": 80,
+    "frames": 960
+  },
+  "test": {
+    "frame_observed": {
+      "tp": 161,
+      "fp": 368,
+      "fn": 29,
+      "tn": 402,
+      "precision": 0.30434782608695654,
+      "recall": 0.8473684210526315,
+      "specificity": 0.522077922077922,
+      "f1": 0.44784422809457586,
+      "accuracy": 0.5864583333333333,
+      "balanced_accuracy": 0.6847231715652768
+    },
+    "scenario_observed": {
+      "tp": 34,
+      "fp": 33,
+      "fn": 6,
+      "tn": 7,
+      "precision": 0.5074626865671642,
+      "recall": 0.85,
+      "specificity": 0.175,
+      "f1": 0.6355140186915889,
+      "accuracy": 0.5125,
+      "balanced_accuracy": 0.5125
+    },
+    "frame_severity_accuracy": 0.303125,
+    "frame_risk_accuracy": 0.8,
+    "scenario_severity_accuracy": 0.2875,
+    "scenario_risk_accuracy": 0.8,
+    "scenarios": 80,
+    "frames": 960
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 2.241756594181061,
+      "learning_rate": 0.0002967221401100708,
+      "selection_score": 0.8413768786050255,
+      "validation": {
+        "frame_observed": {
+          "tp": 136,
+          "fp": 311,
+          "fn": 61,
+          "tn": 452,
+          "precision": 0.3042505592841163,
+          "recall": 0.6903553299492385,
+          "specificity": 0.5923984272608126,
+          "f1": 0.42236024844720493,
+          "accuracy": 0.6125,
+          "balanced_accuracy": 0.6413768786050256
+        },
+        "scenario_observed": {
+          "tp": 40,
+          "fp": 40,
+          "fn": 0,
+          "tn": 0,
+          "precision": 0.5,
+          "recall": 1.0,
+          "specificity": 0.0,
+          "f1": 0.6666666666666666,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        "frame_severity_accuracy": 0.21875,
+        "frame_risk_accuracy": 0.5,
+        "scenario_severity_accuracy": 0.2,
+        "scenario_risk_accuracy": 0.5,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 2,
+      "train_loss": 2.196967202425003,
+      "learning_rate": 0.0002870318186463901,
+      "selection_score": 0.8373670257000485,
+      "validation": {
+        "frame_observed": {
+          "tp": 146,
+          "fp": 394,
+          "fn": 51,
+          "tn": 369,
+          "precision": 0.27037037037037037,
+          "recall": 0.7411167512690355,
+          "specificity": 0.4836173001310616,
+          "f1": 0.39620081411126185,
+          "accuracy": 0.5364583333333334,
+          "balanced_accuracy": 0.6123670257000485
+        },
+        "scenario_observed": {
+          "tp": 40,
+          "fp": 40,
+          "fn": 0,
+          "tn": 0,
+          "precision": 0.5,
+          "recall": 1.0,
+          "specificity": 0.0,
+          "f1": 0.6666666666666666,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        "frame_severity_accuracy": 0.24166666666666667,
+        "frame_risk_accuracy": 0.5,
+        "scenario_severity_accuracy": 0.25,
+        "scenario_risk_accuracy": 0.5,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 3,
+      "train_loss": 2.137434748808543,
+      "learning_rate": 0.0002713525491562421,
+      "selection_score": 0.8210113032313004,
+      "validation": {
+        "frame_observed": {
+          "tp": 127,
+          "fp": 353,
+          "fn": 70,
+          "tn": 410,
+          "precision": 0.26458333333333334,
+          "recall": 0.6446700507614214,
+          "specificity": 0.5373525557011796,
+          "f1": 0.37518463810930575,
+          "accuracy": 0.559375,
+          "balanced_accuracy": 0.5910113032313005
+        },
+        "scenario_observed": {
+          "tp": 34,
+          "fp": 35,
+          "fn": 6,
+          "tn": 5,
+          "precision": 0.4927536231884058,
+          "recall": 0.85,
+          "specificity": 0.125,
+          "f1": 0.6238532110091743,
+          "accuracy": 0.4875,
+          "balanced_accuracy": 0.4875
+        },
+        "frame_severity_accuracy": 0.3,
+        "frame_risk_accuracy": 0.4,
+        "scenario_severity_accuracy": 0.3,
+        "scenario_risk_accuracy": 0.4,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 4,
+      "train_loss": 2.0630852381388345,
+      "learning_rate": 0.00025036959095382875,
+      "selection_score": 0.7518595029638548,
+      "validation": {
+        "frame_observed": {
+          "tp": 84,
+          "fp": 271,
+          "fn": 113,
+          "tn": 492,
+          "precision": 0.23661971830985915,
+          "recall": 0.4263959390862944,
+          "specificity": 0.6448230668414154,
+          "f1": 0.30434782608695654,
+          "accuracy": 0.6,
+          "balanced_accuracy": 0.5356095029638549
+        },
+        "scenario_observed": {
+          "tp": 27,
+          "fp": 24,
+          "fn": 13,
+          "tn": 16,
+          "precision": 0.5294117647058824,
+          "recall": 0.675,
+          "specificity": 0.4,
+          "f1": 0.5934065934065933,
+          "accuracy": 0.5375,
+          "balanced_accuracy": 0.5375000000000001
+        },
+        "frame_severity_accuracy": 0.303125,
+        "frame_risk_accuracy": 0.3,
+        "scenario_severity_accuracy": 0.3125,
+        "scenario_risk_accuracy": 0.3,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 5,
+      "train_loss": 2.001627109448115,
+      "learning_rate": 0.00022500000000000002,
+      "selection_score": 0.7751696815269675,
+      "validation": {
+        "frame_observed": {
+          "tp": 103,
+          "fp": 330,
+          "fn": 94,
+          "tn": 433,
+          "precision": 0.23787528868360278,
+          "recall": 0.5228426395939086,
+          "specificity": 0.5674967234600262,
+          "f1": 0.326984126984127,
+          "accuracy": 0.5583333333333333,
+          "balanced_accuracy": 0.5451696815269674
+        },
+        "scenario_observed": {
+          "tp": 31,
+          "fp": 33,
+          "fn": 9,
+          "tn": 7,
+          "precision": 0.484375,
+          "recall": 0.775,
+          "specificity": 0.175,
+          "f1": 0.5961538461538463,
+          "accuracy": 0.475,
+          "balanced_accuracy": 0.475
+        },
+        "frame_severity_accuracy": 0.28958333333333336,
+        "frame_risk_accuracy": 0.4,
+        "scenario_severity_accuracy": 0.3,
+        "scenario_risk_accuracy": 0.4,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 6,
+      "train_loss": 1.911459602912267,
+      "learning_rate": 0.00019635254915624213,
+      "selection_score": 0.804648187757383,
+      "validation": {
+        "frame_observed": {
+          "tp": 131,
+          "fp": 403,
+          "fn": 66,
+          "tn": 360,
+          "precision": 0.24531835205992508,
+          "recall": 0.6649746192893401,
+          "specificity": 0.47182175622542594,
+          "f1": 0.3584131326949384,
+          "accuracy": 0.5114583333333333,
+          "balanced_accuracy": 0.568398187757383
+        },
+        "scenario_observed": {
+          "tp": 32,
+          "fp": 32,
+          "fn": 8,
+          "tn": 8,
+          "precision": 0.5,
+          "recall": 0.8,
+          "specificity": 0.2,
+          "f1": 0.6153846153846154,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        "frame_severity_accuracy": 0.3145833333333333,
+        "frame_risk_accuracy": 0.4,
+        "scenario_severity_accuracy": 0.3125,
+        "scenario_risk_accuracy": 0.4,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 7,
+      "train_loss": 1.8291320621967315,
+      "learning_rate": 0.00016567926949014806,
+      "selection_score": 0.8629561708723914,
+      "validation": {
+        "frame_observed": {
+          "tp": 136,
+          "fp": 362,
+          "fn": 61,
+          "tn": 401,
+          "precision": 0.27309236947791166,
+          "recall": 0.6903553299492385,
+          "specificity": 0.5255570117955439,
+          "f1": 0.39136690647482014,
+          "accuracy": 0.559375,
+          "balanced_accuracy": 0.6079561708723913
+        },
+        "scenario_observed": {
+          "tp": 32,
+          "fp": 33,
+          "fn": 8,
+          "tn": 7,
+          "precision": 0.49230769230769234,
+          "recall": 0.8,
+          "specificity": 0.175,
+          "f1": 0.6095238095238096,
+          "accuracy": 0.4875,
+          "balanced_accuracy": 0.48750000000000004
+        },
+        "frame_severity_accuracy": 0.328125,
+        "frame_risk_accuracy": 0.4,
+        "scenario_severity_accuracy": 0.35,
+        "scenario_risk_accuracy": 0.4,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 8,
+      "train_loss": 1.7754471719264984,
+      "learning_rate": 0.00013432073050985205,
+      "selection_score": 0.8477321935852999,
+      "validation": {
+        "frame_observed": {
+          "tp": 133,
+          "fp": 345,
+          "fn": 64,
+          "tn": 418,
+          "precision": 0.27824267782426776,
+          "recall": 0.6751269035532995,
+          "specificity": 0.5478374836173001,
+          "f1": 0.394074074074074,
+          "accuracy": 0.5739583333333333,
+          "balanced_accuracy": 0.6114821935852999
+        },
+        "scenario_observed": {
+          "tp": 32,
+          "fp": 30,
+          "fn": 8,
+          "tn": 10,
+          "precision": 0.5161290322580645,
+          "recall": 0.8,
+          "specificity": 0.25,
+          "f1": 0.6274509803921569,
+          "accuracy": 0.525,
+          "balanced_accuracy": 0.525
+        },
+        "frame_severity_accuracy": 0.3072916666666667,
+        "frame_risk_accuracy": 0.4,
+        "scenario_severity_accuracy": 0.3125,
+        "scenario_risk_accuracy": 0.4,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 9,
+      "train_loss": 1.7439127047856648,
+      "learning_rate": 0.00010364745084375793,
+      "selection_score": 0.8187116545029971,
+      "validation": {
+        "frame_observed": {
+          "tp": 145,
+          "fp": 369,
+          "fn": 52,
+          "tn": 394,
+          "precision": 0.2821011673151751,
+          "recall": 0.7360406091370558,
+          "specificity": 0.5163826998689384,
+          "f1": 0.4078762306610408,
+          "accuracy": 0.5614583333333333,
+          "balanced_accuracy": 0.6262116545029971
+        },
+        "scenario_observed": {
+          "tp": 34,
+          "fp": 35,
+          "fn": 6,
+          "tn": 5,
+          "precision": 0.4927536231884058,
+          "recall": 0.85,
+          "specificity": 0.125,
+          "f1": 0.6238532110091743,
+          "accuracy": 0.4875,
+          "balanced_accuracy": 0.4875
+        },
+        "frame_severity_accuracy": 0.234375,
+        "frame_risk_accuracy": 0.4,
+        "scenario_severity_accuracy": 0.225,
+        "scenario_risk_accuracy": 0.4,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 10,
+      "train_loss": 1.6984185139338175,
+      "learning_rate": 7.500000000000006e-05,
+      "selection_score": 0.8358213553898249,
+      "validation": {
+        "frame_observed": {
+          "tp": 144,
+          "fp": 360,
+          "fn": 53,
+          "tn": 403,
+          "precision": 0.2857142857142857,
+          "recall": 0.7309644670050761,
+          "specificity": 0.528178243774574,
+          "f1": 0.4108416547788873,
+          "accuracy": 0.5697916666666667,
+          "balanced_accuracy": 0.629571355389825
+        },
+        "scenario_observed": {
+          "tp": 33,
+          "fp": 31,
+          "fn": 7,
+          "tn": 9,
+          "precision": 0.515625,
+          "recall": 0.825,
+          "specificity": 0.225,
+          "f1": 0.6346153846153846,
+          "accuracy": 0.525,
+          "balanced_accuracy": 0.525
+        },
+        "frame_severity_accuracy": 0.228125,
+        "frame_risk_accuracy": 0.5,
+        "scenario_severity_accuracy": 0.2125,
+        "scenario_risk_accuracy": 0.5,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 11,
+      "train_loss": 1.674236422777176,
+      "learning_rate": 4.963040904617133e-05,
+      "selection_score": 0.8639556070414008,
+      "validation": {
+        "frame_observed": {
+          "tp": 153,
+          "fp": 371,
+          "fn": 44,
+          "tn": 392,
+          "precision": 0.2919847328244275,
+          "recall": 0.7766497461928934,
+          "specificity": 0.5137614678899083,
+          "f1": 0.4244105409153954,
+          "accuracy": 0.5677083333333334,
+          "balanced_accuracy": 0.6452056070414008
+        },
+        "scenario_observed": {
+          "tp": 31,
+          "fp": 32,
+          "fn": 9,
+          "tn": 8,
+          "precision": 0.49206349206349204,
+          "recall": 0.775,
+          "specificity": 0.2,
+          "f1": 0.6019417475728155,
+          "accuracy": 0.4875,
+          "balanced_accuracy": 0.48750000000000004
+        },
+        "frame_severity_accuracy": 0.259375,
+        "frame_risk_accuracy": 0.5,
+        "scenario_severity_accuracy": 0.2375,
+        "scenario_risk_accuracy": 0.5,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 12,
+      "train_loss": 1.6347362498442333,
+      "learning_rate": 2.8647450843757904e-05,
+      "selection_score": 0.8665036574169556,
+      "validation": {
+        "frame_observed": {
+          "tp": 146,
+          "fp": 340,
+          "fn": 51,
+          "tn": 423,
+          "precision": 0.3004115226337449,
+          "recall": 0.7411167512690355,
+          "specificity": 0.5543905635648755,
+          "f1": 0.42752562225475843,
+          "accuracy": 0.5927083333333333,
+          "balanced_accuracy": 0.6477536574169556
+        },
+        "scenario_observed": {
+          "tp": 30,
+          "fp": 30,
+          "fn": 10,
+          "tn": 10,
+          "precision": 0.5,
+          "recall": 0.75,
+          "specificity": 0.25,
+          "f1": 0.6,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        "frame_severity_accuracy": 0.26875,
+        "frame_risk_accuracy": 0.5,
+        "scenario_severity_accuracy": 0.2375,
+        "scenario_risk_accuracy": 0.5,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 13,
+      "train_loss": 1.6140546957651773,
+      "learning_rate": 1.2968181353609857e-05,
+      "selection_score": 0.8749986278449349,
+      "validation": {
+        "frame_observed": {
+          "tp": 139,
+          "fp": 319,
+          "fn": 58,
+          "tn": 444,
+          "precision": 0.3034934497816594,
+          "recall": 0.7055837563451777,
+          "specificity": 0.581913499344692,
+          "f1": 0.42442748091603055,
+          "accuracy": 0.6072916666666667,
+          "balanced_accuracy": 0.6437486278449349
+        },
+        "scenario_observed": {
+          "tp": 31,
+          "fp": 33,
+          "fn": 9,
+          "tn": 7,
+          "precision": 0.484375,
+          "recall": 0.775,
+          "specificity": 0.175,
+          "f1": 0.5961538461538463,
+          "accuracy": 0.475,
+          "balanced_accuracy": 0.475
+        },
+        "frame_severity_accuracy": 0.25833333333333336,
+        "frame_risk_accuracy": 0.5,
+        "scenario_severity_accuracy": 0.2625,
+        "scenario_risk_accuracy": 0.5,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 14,
+      "train_loss": 1.5853117863337198,
+      "learning_rate": 3.2778598899291478e-06,
+      "selection_score": 0.869809761095329,
+      "validation": {
+        "frame_observed": {
+          "tp": 142,
+          "fp": 329,
+          "fn": 55,
+          "tn": 434,
+          "precision": 0.30148619957537154,
+          "recall": 0.7208121827411168,
+          "specificity": 0.5688073394495413,
+          "f1": 0.42514970059880236,
+          "accuracy": 0.6,
+          "balanced_accuracy": 0.6448097610953291
+        },
+        "scenario_observed": {
+          "tp": 32,
+          "fp": 30,
+          "fn": 8,
+          "tn": 10,
+          "precision": 0.5161290322580645,
+          "recall": 0.8,
+          "specificity": 0.25,
+          "f1": 0.6274509803921569,
+          "accuracy": 0.525,
+          "balanced_accuracy": 0.525
+        },
+        "frame_severity_accuracy": 0.25833333333333336,
+        "frame_risk_accuracy": 0.5,
+        "scenario_severity_accuracy": 0.25,
+        "scenario_risk_accuracy": 0.5,
+        "scenarios": 80,
+        "frames": 960
+      }
+    },
+    {
+      "epoch": 15,
+      "train_loss": 1.5723403513431549,
+      "learning_rate": 0.0,
+      "selection_score": 0.8794194619821569,
+      "validation": {
+        "frame_observed": {
+          "tp": 141,
+          "fp": 320,
+          "fn": 56,
+          "tn": 443,
+          "precision": 0.30585683297180044,
+          "recall": 0.7157360406091371,
+          "specificity": 0.580602883355177,
+          "f1": 0.4285714285714286,
+          "accuracy": 0.6083333333333333,
+          "balanced_accuracy": 0.648169461982157
+        },
+        "scenario_observed": {
+          "tp": 31,
+          "fp": 31,
+          "fn": 9,
+          "tn": 9,
+          "precision": 0.5,
+          "recall": 0.775,
+          "specificity": 0.225,
+          "f1": 0.607843137254902,
+          "accuracy": 0.5,
+          "balanced_accuracy": 0.5
+        },
+        "frame_severity_accuracy": 0.259375,
+        "frame_risk_accuracy": 0.5,
+        "scenario_severity_accuracy": 0.2625,
+        "scenario_risk_accuracy": 0.5,
+        "scenarios": 80,
+        "frames": 960
+      }
+    }
+  ]
+}
