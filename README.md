@@ -27,9 +27,16 @@ The system is intentionally read-only: it never writes to the PLC or controls th
 | Frozen neural ranking on Dataset 5 | ROC AUC 0.839 |
 | Mean / p95 neural inference latency on Spark | 4.1 / 4.9 ms |
 
-The integrated results use a three-of-five-frame persistence rule at the balanced evaluation threshold of `0.0265`. They are the values reported in the executive summary. The demonstration dashboard uses the more sensitive `0.0071` threshold to reduce missed defects, so it intentionally produces more inspection warnings and should not be assigned the balanced-threshold accuracy above.
+The integrated results use a three-of-five-frame persistence rule. The same corrected Dataset 5 replay was also scored at the dashboard threshold:
 
-These are prototype results, not a production acceptance claim. Dataset 5 ground truth uses expected carryover by batch position rather than an independent lab assay, and only 23 vials are scored. The `0.0265` threshold was selected after Dataset 5 analysis, so its performance is descriptive rather than an unbiased untouched-test result. A separate leave-one-recipe-out analysis produced 71.4% recall, 75.0% specificity, and 73.2% balanced accuracy; those cross-validation results remain documented in the [model card](dataset2/MODEL_CARD.md).
+| Operating point | TP | FP | FN | TN | Recall | Specificity | Precision | Accuracy |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Balanced evaluation `0.0265` | 6 | 2 | 1 | 14 | 85.7% | 87.5% | 75.0% | 87.0% |
+| Dashboard sensitivity `0.0071` | 6 | 10 | 1 | 6 | 85.7% | 37.5% | 37.5% | 52.2% |
+
+Lowering the threshold to `0.0071` did not recover the missed expected case on this replay and increased false alarms from two to ten. It should therefore be treated as a sensitivity demonstration, not as a validated improvement over the balanced operating point.
+
+These are prototype results, not a production acceptance claim. Dataset 5 ground truth uses expected carryover by batch position rather than an independent lab assay, and only 23 vials are scored. The `0.0265` threshold was selected after Dataset 5 analysis, so its performance is descriptive rather than an unbiased untouched-test result. Additional calibration experiments remain documented in the [model card](dataset2/MODEL_CARD.md) for technical review.
 
 ## Repository map
 
