@@ -19,13 +19,17 @@ The system is intentionally read-only: it never writes to the PLC or controls th
 | Corrected Dataset 5 vials scored | 23 |
 | Expected carryover vials | 7 |
 | Interpretable batch rule | 7/7 expected carryover vials found |
+| Integrated shadow pipeline at threshold 0.0265 | 6 TP, 2 FP, 1 FN, 14 TN |
+| Integrated recall | 85.7% |
+| Integrated specificity | 87.5% |
+| Integrated precision | 75.0% |
+| Integrated accuracy | 87.0% |
 | Frozen neural ranking on Dataset 5 | ROC AUC 0.839 |
-| Leave-one-recipe-out neural recall | 5/7 (71.4%) |
-| Leave-one-recipe-out neural specificity | 12/16 (75.0%) |
-| Leave-one-recipe-out balanced accuracy | 73.2% |
 | Mean / p95 neural inference latency on Spark | 4.1 / 4.9 ms |
 
-These are prototype results, not a production acceptance claim. Dataset 5 ground truth uses expected carryover by batch position rather than an independent lab assay, and only 23 vials are scored. The post-hoc best threshold is retained for analysis but is not reported as unbiased test accuracy.
+The integrated results use a three-of-five-frame persistence rule at the balanced evaluation threshold of `0.0265`. They are the values reported in the executive summary. The demonstration dashboard uses the more sensitive `0.0071` threshold to reduce missed defects, so it intentionally produces more inspection warnings and should not be assigned the balanced-threshold accuracy above.
+
+These are prototype results, not a production acceptance claim. Dataset 5 ground truth uses expected carryover by batch position rather than an independent lab assay, and only 23 vials are scored. The `0.0265` threshold was selected after Dataset 5 analysis, so its performance is descriptive rather than an unbiased untouched-test result. A separate leave-one-recipe-out analysis produced 71.4% recall, 75.0% specificity, and 73.2% balanced accuracy; those cross-validation results remain documented in the [model card](dataset2/MODEL_CARD.md).
 
 ## Repository map
 
