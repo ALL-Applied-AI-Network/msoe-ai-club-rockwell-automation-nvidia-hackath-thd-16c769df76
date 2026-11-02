@@ -27,14 +27,7 @@ The system is intentionally read-only: it never writes to the PLC or controls th
 | Frozen neural ranking on Dataset 5 | ROC AUC 0.839 |
 | Mean / p95 neural inference latency on Spark | 4.1 / 4.9 ms |
 
-The integrated results use a three-of-five-frame persistence rule. The same corrected Dataset 5 replay was also scored at the dashboard threshold:
-
-| Operating point | TP | FP | FN | TN | Recall | Specificity | Precision | Accuracy |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| Balanced evaluation `0.0265` | 6 | 2 | 1 | 14 | 85.7% | 87.5% | 75.0% | 87.0% |
-| Dashboard sensitivity `0.0071` | 6 | 10 | 1 | 6 | 85.7% | 37.5% | 37.5% | 52.2% |
-
-Lowering the threshold to `0.0071` did not recover the missed expected case on this replay and increased false alarms from two to ten. It should therefore be treated as a sensitivity demonstration, not as a validated improvement over the balanced operating point.
+The integrated results use a three-of-five-frame persistence rule at the balanced evaluation threshold of `0.0265`. They are the values reported in the executive summary. The demonstration dashboard uses a separate sensitivity setting, so its warnings should not be assigned the balanced-threshold accuracy above.
 
 These are prototype results, not a production acceptance claim. Dataset 5 ground truth uses expected carryover by batch position rather than an independent lab assay, and only 23 vials are scored. The `0.0265` threshold was selected after Dataset 5 analysis, so its performance is descriptive rather than an unbiased untouched-test result. Additional calibration experiments remain documented in the [model card](dataset2/MODEL_CARD.md) for technical review.
 
@@ -105,4 +98,5 @@ Model weights are excluded in accordance with the hackathon repository guidance.
 ## Hackathon
 
 This work addresses the [Fluid Mixing Station 3 challenge](https://msoe-maic.com/library?article=Rockwell-NVIDIA-Fall-2026-Fluid-Mixing) in the Rockwell Automation + NVIDIA Innovation Lab Fall 2026 hackathon.
+
 
