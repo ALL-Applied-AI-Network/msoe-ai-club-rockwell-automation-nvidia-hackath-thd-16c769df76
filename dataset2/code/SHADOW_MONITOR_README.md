@@ -2,7 +2,7 @@
 
 `live_monitor.py` keeps the original `PREDICT -> DETECT -> CONFIRM` rules and optionally runs the frozen neural model alongside them. Neural alerts are advisory only and never control the PLC.
 
-Current provisional configuration is recorded in `shadow_config.json`: probability threshold `0.0265`, a five-visible-frame rolling window, and at least three frames at or above threshold before an alert.
+Current provisional configuration is recorded in `shadow_config.json`: recall-prioritized probability threshold `0.0071`, a five-visible-frame rolling window, and at least three frames at or above threshold before an alert. This operating point intentionally accepts more false positives to reduce missed defects.
 
 Example replay:
 
@@ -13,7 +13,7 @@ python3 live_monitor.py \
   --data-root /path/to/vial_fill \
   --out-dir /path/to/run-output \
   --model /path/to/model.ts \
-  --model-threshold 0.0265 \
+  --model-threshold 0.0071 \
   --model-window 5 \
   --model-min-frames 3 \
   --tank-colors /path/to/tank_colors.npy

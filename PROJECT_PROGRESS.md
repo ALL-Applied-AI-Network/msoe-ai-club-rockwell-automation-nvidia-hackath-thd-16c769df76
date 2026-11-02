@@ -47,6 +47,8 @@ The team selected Fluid Mixing Station 3 and focused on carryover: residual liqu
 - Split the operator interface into a stable `/demo` saved-run presentation and a separate `/live` CSI testing workspace.
 - Added dashboard recipe entry/CSV import, expected-color calculation, validation, timestamped queue snapshots, and guarded start/pause/resume/stop/realign controls for the advisory monitor only.
 - Deployed the split-view dashboard beside v2 on Spark localhost port 20401 and verified both views through an independent SSH tunnel; the preserved port-20400 presentation was not changed.
+- Added an on-demand Dataset 5 control panel to `/demo` that can launch the frozen model at 1x live speed, stream fresh frames/results into the dashboard, and pause, resume, restart, or stop the isolated replay while preserving every run.
+- Reduced operator interruption by presenting neural `MODEL` events as purple non-blocking watches and recipe `PREDICT` events as amber banners; only color `DETECT` and `CONFIRM` evidence opens an acknowledgement modal. The demo and live launchers now use the recall-prioritized `0.0071` threshold with three-of-five persistence, intentionally accepting more false alarms to reduce missed defects.
 
 ## Deployment boundary and next steps
 
@@ -57,4 +59,21 @@ The team selected Fluid Mixing Station 3 and focused on carryover: residual liqu
 - Measure camera-to-alert latency and operator usefulness at CSI.
 - Replace the manual queue with a read-only PLC/MES recipe feed for production deployment.
 
+## Final submission video
+
+- Recorded nine narration sections totaling about 5 minutes 9 seconds.
+- Preserved four CSI line videos, one CSI tank photograph, and a 29-minute 1080p/60 fps dashboard recording under the final-submission source-media folder.
+- Built an editable nine-slide visual package covering the architecture, testing data, access limitations, recipe-queue boundary, measured results, manufacturing value, and next steps.
+- Selected a dashboard excerpt showing the Recipe 6-to-7 transition, orange future-risk warning, queue movement, live camera view, and red confirmed-carryover alert.
+- Rendered a 1920x1080, 30 fps first cut with the narration, CSI footage, synthetic/digital-twin footage, dashboard demonstration, and metric slides.
+- Normalized the narration to approximately -16.6 LUFS for reliable presentation playback.
+- The video states the physical-line access limitations directly and does not imply an untouched live production trial.
+
+## Executive summary
+
+- Produced a final one-page executive summary for the judges.
+- The summary directly answers the required questions about the manufacturing problem, physical AI, CSI equipment, data, evidence, manufacturing value, limitations, and deployment path.
+- It reports the balanced-threshold Dataset 5 results separately from the recall-prioritized dashboard setting.
+- It states that the team did not complete an untouched live production trial and identifies authorized live-camera and read-only PLC or MES integration as future work.
+- The final submission copy is available as a visually verified PDF in the final-submission executive-summary folder.
 

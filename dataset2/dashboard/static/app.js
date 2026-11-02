@@ -37,6 +37,7 @@ let newestEventId = 0;
 let pendingAlerts = [];
 let activeAlert = null;
 let liveFrameVersion = null;
+let activeDemoRunId = null;
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, character => ({
@@ -137,7 +138,10 @@ function renderQueue(queue, counts) {
   ui.queueBody.innerHTML = queue.map(row => {
     const current = row.status === 'filling' || row.status === 'next';
     let risk = '<span class="muted">—</span>';
-    if (row.defect) risk = `<span class="risk-badge actual">${escapeHtml(row.defect.kind)}</span>`;
+    if (row.defect) {
+      const kind = String(row.defect.kind || 'alert').toLowerCase();
+      risk = `<span class="risk-badge actual ${escapeHtml(kind)}">${escapeHtml(row.defect.kind)}</span>`;
+    }
     else if (row.prediction) risk = `<span class="risk-badge ${riskLevel(row.prediction).toLowerCase()}">${escapeHtml(riskLevel(row.prediction))}</span>`;
     return `<tr class="${current ? 'current' : escapeHtml(row.status)}">
       <td><strong>${escapeHtml(row.vial)}</strong></td>
@@ -204,7 +208,10 @@ function showNextAlert() {
 }
 
 function collectAlerts(events) {
-  const alertKinds = new Set(['PREDICT', 'MODEL', 'DETECT', 'CONFIRM']);
+  // Recipe predictions and neural shadow signals stay visible in the banner,
+  // queue, probability panel, and timeline without interrupting the operator.
+  // Only stronger observed-color evidence opens an acknowledgement modal.
+  const alertKinds = new Set(['DETECT', 'CONFIRM']);
   const maximumId = Math.max(0, ...events.map(event => Number(event.id || 0)));
   if (!initialized) {
     newestEventId = maximumId;
@@ -226,9 +233,14 @@ function collectAlerts(events) {
 function renderBanner(events) {
   const lastAlert = [...events].reverse().find(event => ['PREDICT', 'MODEL', 'DETECT', 'CONFIRM'].includes(String(event.kind).toUpperCase()));
   if (!lastAlert) { ui.alertBanner.classList.add('hidden'); return; }
-  const prediction = String(lastAlert.kind).toUpperCase() === 'PREDICT';
-  ui.alertBanner.className = `alert-banner ${prediction ? 'prediction' : ''}`;
-  ui.alertBanner.textContent = `${prediction ? 'Future risk' : 'Latest defect notice'} · Vial ${lastAlert.vial}: ${lastAlert.message}`;
+  const kind = String(lastAlert.kind).toUpperCase();
+  const label = kind === 'PREDICT' ? 'Future risk'
+    : kind === 'MODEL' ? 'Neural model watch'
+    : kind === 'DETECT' ? 'Live color detection'
+    : 'Confirmed color mismatch';
+  const style = kind === 'PREDICT' ? 'prediction' : kind === 'MODEL' ? 'model-watch' : 'actual';
+  ui.alertBanner.className = `alert-banner ${style}`;
+  ui.alertBanner.textContent = `${label} · Vial ${lastAlert.vial}: ${lastAlert.message}`;
 }
 
 async function refresh() {
@@ -237,6 +249,16 @@ async function refresh() {
     if (response.status === 401) { window.location.assign('/login'); return; }
     if (!response.ok) throw new Error(`status ${response.status}`);
     const state = await response.json();
+    const demoRunId = state.demo_control?.run_id || null;
+    if (demoRunId && demoRunId !== activeDemoRunId) {
+      initialized = false;
+      newestEventId = 0;
+      pendingAlerts = [];
+      activeAlert = null;
+      liveFrameVersion = null;
+      ui.modal.classList.add('hidden');
+    }
+    activeDemoRunId = demoRunId;
     const active = state.monitor.status === 'active';
     ui.connectionDot.className = `status-dot ${active ? '' : 'waiting'}`;
     ui.connectionText.textContent = active ? 'Monitor active' : (state.monitor.has_events ? 'Monitor idle' : 'Waiting for monitor');
@@ -261,4 +283,3 @@ ui.acknowledge.addEventListener('click', () => {
 
 refresh();
 setInterval(refresh, 750);
-

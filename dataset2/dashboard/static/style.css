@@ -12,6 +12,8 @@
   --amber-soft: rgba(255, 189, 74, .14);
   --red: #ff5964;
   --red-soft: rgba(255, 89, 100, .14);
+  --purple: #c39bff;
+  --purple-soft: rgba(195, 155, 255, .14);
   --blue: #70a9ff;
   --radius: 18px;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -97,6 +99,7 @@ tr.completed { opacity: .5; }
 .queue-status.upcoming { color: var(--muted); border: 1px solid var(--line); }
 .risk-badge { color: var(--amber); background: var(--amber-soft); }
 .risk-badge.high, .risk-badge.actual { color: var(--red); background: var(--red-soft); }
+.risk-badge.actual.model { color: var(--purple); background: var(--purple-soft); }
 
 .events-list { max-height: 560px; overflow: auto; padding: 8px 18px 18px; }
 .event { padding: 14px 0; border-bottom: 1px solid var(--line); }
@@ -104,7 +107,8 @@ tr.completed { opacity: .5; }
 .event-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .event-kind { color: var(--blue); background: rgba(112,169,255,.12); }
 .event-kind.PREDICT { color: var(--amber); background: var(--amber-soft); }
-.event-kind.DETECT, .event-kind.CONFIRM, .event-kind.MODEL { color: var(--red); background: var(--red-soft); }
+.event-kind.MODEL { color: var(--purple); background: var(--purple-soft); }
+.event-kind.DETECT, .event-kind.CONFIRM { color: var(--red); background: var(--red-soft); }
 .event-kind.OK { color: var(--mint); background: var(--mint-soft); }
 .event-time { color: var(--muted); font-size: 11px; }
 .event p { margin: 0; font-size: 12px; line-height: 1.55; color: #ccdad7; }
@@ -112,6 +116,7 @@ tr.completed { opacity: .5; }
 
 .alert-banner { margin-bottom: 18px; padding: 15px 18px; border-radius: 14px; border: 1px solid rgba(255,89,100,.38); background: var(--red-soft); color: #ffd7da; font-weight: 700; }
 .alert-banner.prediction { border-color: rgba(255,189,74,.38); background: var(--amber-soft); color: #ffe1a8; }
+.alert-banner.model-watch { border-color: rgba(195,155,255,.38); background: var(--purple-soft); color: #eadcff; }
 .hidden { display: none !important; }
 
 .modal-backdrop { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.72); backdrop-filter: blur(10px); display: grid; place-items: center; padding: 20px; }
@@ -159,6 +164,15 @@ button:disabled { opacity: .42; cursor: not-allowed; }
 .config-item { padding: 5px 7px; border-radius: 999px; background: var(--red-soft); color: #ffadb3; font-size: 9px; font-weight: 800; text-transform: uppercase; }
 .config-item.ready { color: var(--mint); background: var(--mint-soft); }
 .live-hero-grid { grid-template-columns: minmax(420px, 1.45fr) minmax(290px, .85fr) minmax(260px, .7fr); }
+.demo-launch-panel { margin-bottom: 18px; padding: 14px 16px; display: grid; grid-template-columns: minmax(260px, 1.5fr) minmax(210px, .8fr) auto; align-items: center; gap: 14px; }
+.demo-launch-copy { display: grid; gap: 4px; }
+.demo-launch-copy strong { font-size: 15px; }
+.demo-launch-copy > span:last-child { color: var(--muted); font-size: 11px; }
+.demo-launch-status { display: grid; justify-items: start; gap: 7px; font-size: 10px; }
+.demo-launch-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+.demo-launch-actions button { padding: 9px 12px; font-size: 10px; }
+.demo-launch-panel .configuration-checks, .demo-launch-panel .control-feedback { grid-column: 1 / -1; }
+.demo-launch-panel .control-feedback { min-height: 0; padding: 8px 0 0; border-top: 1px solid var(--line); }
 
 .login-body { display: grid; place-items: center; padding: 24px; }
 .login-card { width: min(420px, 100%); padding: 38px; border: 1px solid var(--line); border-radius: 24px; background: var(--panel); box-shadow: 0 30px 90px rgba(0,0,0,.35); }
@@ -171,7 +185,8 @@ button:disabled { opacity: .42; cursor: not-allowed; }
 .security-note { margin: 16px 0 0; color: var(--muted); font-size: 11px; }
 
 @media (max-width: 980px) {
-  .hero-grid, .content-grid, .live-control-grid { grid-template-columns: 1fr; }
+  .hero-grid, .content-grid, .live-control-grid, .demo-launch-panel { grid-template-columns: 1fr; }
+  .demo-launch-actions { justify-content: flex-start; }
   .events-panel { order: -1; }
 }
 @media (max-width: 1260px) and (min-width: 981px) {
@@ -189,4 +204,3 @@ button:disabled { opacity: .42; cursor: not-allowed; }
   .tank-grid { grid-template-columns: 1fr; }
   th:nth-child(3), td:nth-child(3) { display: none; }
 }
-

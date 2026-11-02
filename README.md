@@ -38,6 +38,16 @@ These are prototype results, not a production acceptance claim. Dataset 5 ground
 - [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md): chronological implementation summary and remaining work
 - [`dataset2/DATASET_CARD.md`](dataset2/DATASET_CARD.md): provenance and data limitations
 - [`dataset2/MODEL_CARD.md`](dataset2/MODEL_CARD.md): model scope, evaluation, and safety boundary
+- [`submission`](submission): executive summary, video shot list, presentation visuals, and final-video notes
+
+## Submission materials
+
+- [`Executive summary (PDF)`](submission/Team_THD_Carryover_Monitor_Executive_Summary.pdf)
+- [`Editable executive summary (DOCX)`](submission/Team_THD_Carryover_Monitor_Executive_Summary.docx)
+- [`Video shot list`](submission/VIDEO_SHOT_LIST.md)
+- [`Submission and final-video notes`](submission/README.md)
+
+The final rendered video, original CSI recordings, and editable visual deck are intentionally stored outside Git as media-authoring artifacts. The repository contains the reproducible source, measured results, executive summary, and video plan.
 
 ## Quick start: recorded replay
 

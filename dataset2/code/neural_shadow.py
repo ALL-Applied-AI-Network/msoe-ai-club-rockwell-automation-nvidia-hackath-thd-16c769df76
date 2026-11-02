@@ -41,7 +41,7 @@ class NeuralShadowMonitor:
         self,
         model_path,
         prediction_log,
-        threshold=0.0265,
+        threshold=0.0071,
         window=5,
         min_frames=3,
         tank_colors_path=None,

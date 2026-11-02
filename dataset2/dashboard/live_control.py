@@ -371,4 +371,3 @@ class LiveRunController:
             self._audit("run_realigned", previous_run=previous, start_vial=int(start_vial))
             return status
 
-

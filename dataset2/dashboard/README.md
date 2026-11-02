@@ -7,12 +7,38 @@ This is a token-protected browser interface for `live_monitor.py`. It has two de
 
 Both views show the latest camera frame with the model and color-analysis regions, recipe queue, active vial and recipe, latest neural probability, and recent event timeline. New events produce operator pop-ups:
 
-- `PREDICT`: amber future carryover-risk warning
-- `MODEL`: red neural shadow warning
+- `PREDICT`: amber, non-blocking future carryover-risk banner
+- `MODEL`: purple, non-blocking neural model watch
 - `DETECT`: red unexpected-color warning during the pour
 - `CONFIRM`: red confirmed carryover warning
 
-Acknowledging a pop-up only closes it in that browser. Live controls can start, pause, resume, realign, and stop the monitor container, but never connect to or operate the PLC or physical line. The physical machine must be controlled separately under CSI procedures.
+Only `DETECT` and `CONFIRM` open acknowledgement modals. Acknowledging a modal only closes it in that browser. Live controls can start, pause, resume, realign, and stop the monitor container, but never connect to or operate the PLC or physical line. The physical machine must be controlled separately under CSI procedures. The neural shadow uses a recall-prioritized threshold of `0.0071` with three qualifying frames in the latest five-frame window. This intentionally favors catching possible defects over minimizing false alarms.
+
+## On-demand Dataset 5 demo
+
+The saved-run page can optionally start Dataset 5 as a fresh, real-time (1x)
+replay on the Spark. This is intended for demonstrations away from CSI. Every
+start creates a timestamped output folder and streams its current frame,
+predictions, detections, and recipe position into `/demo`. The fixed profile can
+be paused, resumed, restarted, or stopped from the page; it cannot run arbitrary
+commands or interact with the PLC.
+
+Enable it by adding the frozen replay inputs when starting the server:
+
+```bash
+python3 dashboard/dashboard_server.py \
+  ...saved-run arguments... \
+  --demo-root /home/USER/workspace/live/on-demand-dataset5 \
+  --demo-workspace /home/USER/workspace \
+  --demo-code-dir /home/USER/workspace/code/PROJECT/dataset2/code \
+  --demo-data-root /home/USER/workspace/data/csi-vial-fill-dataset/vial_fill \
+  --demo-model /home/USER/workspace/models/carryover/model.ts \
+  --demo-tank-colors /home/USER/workspace/models/carryover/tank_colors.npy
+```
+
+The demo uses the server's saved-run queue unless `--demo-queue` is supplied.
+The page disables Start and identifies any missing fixed input. Dataset 5 takes
+about 28 minutes at live speed; navigation away from the page does not stop it.
 
 ## Run it
 
@@ -108,4 +134,3 @@ Optional expected-color columns from the monitor are also accepted. The monitor 
 - Monitor commands use a fixed container profile; arbitrary shell commands are not accepted.
 - No PLC endpoints or physical equipment-control actions exist in this server.
 - Model warnings remain advisory and require operator judgment.
-

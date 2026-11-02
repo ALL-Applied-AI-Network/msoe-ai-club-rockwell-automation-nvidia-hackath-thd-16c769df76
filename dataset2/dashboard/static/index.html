@@ -24,7 +24,28 @@
   </header>
 
   <main class="dashboard-shell">
-    <section id="alertBanner" class="alert-banner hidden" aria-live="assertive"></section>
+    <section class="panel demo-launch-panel">
+      <div class="demo-launch-copy">
+        <span class="eyebrow">ON-DEMAND MODEL DEMONSTRATION</span>
+            <strong>Dataset 5 · 1× live speed</strong>
+        <span>Reruns the saved camera frames through the frozen model in about 28 minutes.</span>
+      </div>
+      <div class="demo-launch-status">
+        <span id="demoRunState" class="status-chip">Checking</span>
+        <span id="demoRunDetails" class="muted">Checking Spark configuration…</span>
+      </div>
+      <div class="demo-launch-actions">
+        <button id="demoStartButton" type="button">Start demo</button>
+        <button id="demoPauseButton" class="secondary-button" type="button">Pause</button>
+        <button id="demoResumeButton" class="secondary-button" type="button">Resume</button>
+        <button id="demoRestartButton" class="warning-button" type="button">Restart</button>
+        <button id="demoStopButton" class="danger-button" type="button">Stop</button>
+      </div>
+      <div id="demoConfiguration" class="configuration-checks"></div>
+      <div id="demoFeedback" class="control-feedback"></div>
+    </section>
+
+    <section id="alertBanner" class="alert-banner hidden" aria-live="polite"></section>
 
     <section class="hero-grid">
       <article class="panel camera-panel">
@@ -66,7 +87,7 @@
         </div>
         <div class="queue-table-wrap">
           <table>
-            <thead><tr><th>Vial</th><th>Recipe</th><th>Composition</th><th>Status</th><th>Risk</th></tr></thead>
+            <thead><tr><th>Vial</th><th>Recipe</th><th>Composition</th><th>Status</th><th>Alert / result</th></tr></thead>
             <tbody id="queueBody"></tbody>
           </table>
         </div>
@@ -90,6 +111,6 @@
   </div>
 
   <script src="/app.js"></script>
+  <script src="/demo.js"></script>
 </body>
 </html>
-

@@ -402,8 +402,8 @@ def main():
     ap.add_argument("--data-root", default=DATA, help="vial_fill folder containing image_index.csv and images/")
     ap.add_argument("--out-dir", default=OUT, help="folder for event and neural prediction logs")
     ap.add_argument("--model", help="TorchScript model.ts; enables advisory-only neural shadow mode")
-    ap.add_argument("--model-threshold", type=float, default=0.0265,
-                    help="provisional Dataset-5-calibrated shadow threshold")
+    ap.add_argument("--model-threshold", type=float, default=0.0071,
+                    help="recall-prioritized provisional shadow threshold")
     ap.add_argument("--model-window", type=int, default=5, help="rolling visible-frame window")
     ap.add_argument("--model-min-frames", type=int, default=3,
                     help="recent frames that must meet threshold before a model alert")
@@ -460,4 +460,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

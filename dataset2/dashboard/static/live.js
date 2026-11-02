@@ -205,4 +205,3 @@ liveUi.realign.addEventListener('click', async () => {
 
 loadConfig(true);
 setInterval(() => loadConfig(false), 1500);
-

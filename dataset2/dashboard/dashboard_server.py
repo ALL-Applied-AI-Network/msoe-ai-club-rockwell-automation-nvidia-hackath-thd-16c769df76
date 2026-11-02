@@ -20,6 +20,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs
 
+from demo_control import DemoRunController
 from live_control import LiveControlError, LiveRunController, validate_queue
 
 
@@ -223,7 +224,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
         supplied = self.headers.get("X-CSRF-Token", "")
         return bool(supplied) and secrets.compare_digest(supplied, self.server.csrf_token)
 
-    def require_live_write_access(self):
+    def require_control_write_access(self):
         if not self.authenticated():
             self.send_json(401, {"error": "authentication required"})
             return False
@@ -238,15 +239,33 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if not self.authenticated():
                 self.send_json(401, {"error": "authentication required"})
                 return
-            self.send_json(
-                200,
-                build_state(
-                    self.server.queue_path,
-                    self.server.events_path,
-                    self.server.neural_path,
-                    self.server.frame_path,
-                ),
-            )
+            paths = self.server.demo_controller.paths()
+            if paths:
+                state = build_state(
+                    paths["queue"], paths["events"], paths["neural"], paths["frame"],
+                    "/api/demo/latest-frame",
+                )
+            else:
+                state = build_state(
+                    self.server.queue_path, self.server.events_path,
+                    self.server.neural_path, self.server.frame_path,
+                )
+            state["demo_control"] = self.server.demo_controller.status()
+            self.send_json(200, state)
+            return
+        if path == "/api/demo/config":
+            if not self.authenticated():
+                self.send_json(401, {"error": "authentication required"})
+                return
+            self.send_json(200, {
+                "csrf_token": self.server.csrf_token,
+                "control": self.server.demo_controller.status(),
+                "profile": {
+                    "id": "dataset5_real_time", "name": "Dataset 5 · recorded speed",
+                    "description": "Rerun every saved Dataset 5 frame through the frozen model at 1× timing.",
+                },
+                "safety": "Replay only. Does not connect to or control the PLC or machine.",
+            })
             return
         if path == "/api/live/config":
             if not self.authenticated():
@@ -287,6 +306,16 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 return
             self.serve_file(self.server.live_controller.paths()["frame"], "image/jpeg")
             return
+        if path == "/api/demo/latest-frame":
+            if not self.authenticated():
+                self.send_json(401, {"error": "authentication required"})
+                return
+            paths = self.server.demo_controller.paths()
+            if not paths:
+                self.send_error(404)
+                return
+            self.serve_file(paths["frame"], "image/jpeg")
+            return
         if path == "/healthz":
             self.send_json(200, {"status": "ok"})
             return
@@ -295,6 +324,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
         if path == "/live.js":
             self.serve_file(STATIC / "live.js", "text/javascript; charset=utf-8")
+            return
+        if path == "/demo.js":
+            self.serve_file(STATIC / "demo.js", "text/javascript; charset=utf-8")
             return
         if path == "/style.css":
             self.serve_file(STATIC / "style.css", "text/css; charset=utf-8")
@@ -327,13 +359,32 @@ class DashboardHandler(BaseHTTPRequestHandler):
             )
             self.send_bytes(303, b"", "text/plain", {"Location": "/demo", "Set-Cookie": cookie})
             return
-        if not path.startswith("/api/live/"):
+        if not (path.startswith("/api/live/") or path.startswith("/api/demo/")):
             self.send_error(404)
             return
-        if not self.require_live_write_access():
+        if not self.require_control_write_access():
             return
         try:
             payload = self.read_json_body()
+            if path.startswith("/api/demo/"):
+                controller = self.server.demo_controller
+                if payload.get("confirmed") is not True and path in {
+                    "/api/demo/start", "/api/demo/restart", "/api/demo/stop",
+                }:
+                    raise LiveControlError("operator confirmation is required")
+                if path == "/api/demo/start":
+                    self.send_json(200, controller.start())
+                elif path == "/api/demo/restart":
+                    self.send_json(200, controller.restart())
+                elif path == "/api/demo/stop":
+                    self.send_json(200, controller.stop())
+                elif path == "/api/demo/pause":
+                    self.send_json(200, controller.pause())
+                elif path == "/api/demo/resume":
+                    self.send_json(200, controller.resume())
+                else:
+                    self.send_error(404)
+                return
             controller = self.server.live_controller
             if path == "/api/live/queue/validate":
                 result = validate_queue(payload.get("rows"), controller.tank_colors)
@@ -385,6 +436,15 @@ def main():
     parser.add_argument("--live-tank-colors", help="allowlisted 3x3 tank_colors.npy")
     parser.add_argument("--live-image", default=os.environ.get("CARRYOVER_IMAGE", "nvcr.io/nvidia/pytorch:25.10-py3"))
     parser.add_argument("--live-container-name", default="carryover-live-monitor")
+    parser.add_argument("--demo-root", help="root for on-demand Dataset 5 replay outputs")
+    parser.add_argument("--demo-workspace", help="workspace mounted into the fixed demo container")
+    parser.add_argument("--demo-code-dir", help="folder containing live_monitor.py and neural_shadow.py")
+    parser.add_argument("--demo-data-root", help="Dataset 5 vial_fill folder")
+    parser.add_argument("--demo-queue", help="fixed Dataset 5 recipe queue; defaults to --queue")
+    parser.add_argument("--demo-model", help="frozen Dataset 5 TorchScript model.ts")
+    parser.add_argument("--demo-tank-colors", help="frozen Dataset 5 tank_colors.npy")
+    parser.add_argument("--demo-image", default=os.environ.get("CARRYOVER_IMAGE", "nvcr.io/nvidia/pytorch:25.10-py3"))
+    parser.add_argument("--demo-container-name", default="carryover-dataset5-on-demand")
     args = parser.parse_args()
 
     token = args.token or secrets.token_urlsafe(18)
@@ -410,6 +470,19 @@ def main():
         image=args.live_image,
         container_name=args.live_container_name,
     )
+    demo_workspace = Path(args.demo_workspace or args.live_workspace).resolve()
+    demo_root = Path(args.demo_root).resolve() if args.demo_root else server.events_path.parent / "demo_control"
+    server.demo_controller = DemoRunController(
+        demo_root=demo_root,
+        workspace=demo_workspace,
+        code_dir=args.demo_code_dir or args.live_code_dir or HERE.parent / "code",
+        data_root=args.demo_data_root or demo_workspace / "data" / "csi-vial-fill-dataset" / "vial_fill",
+        queue_path=args.demo_queue or server.queue_path,
+        model_path=args.demo_model,
+        tank_colors_path=args.demo_tank_colors,
+        image=args.demo_image,
+        container_name=args.demo_container_name,
+    )
     print(f"Dashboard: http://{args.host}:{args.port}")
     print(f"Login token: {token}")
     print("Advisory monitor only. Live controls do not connect to or control the PLC.")
@@ -423,4 +496,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
