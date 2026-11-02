@@ -29,7 +29,7 @@ The system is intentionally read-only: it never writes to the PLC or controls th
 
 The integrated results use a three-of-five-frame persistence rule at the balanced evaluation threshold of `0.0265`. They are the values reported in the executive summary. The demonstration dashboard uses a separate sensitivity setting, so its warnings should not be assigned the balanced-threshold accuracy above.
 
-These are prototype results, not a production acceptance claim. Dataset 5 ground truth uses expected carryover by batch position rather than an independent lab assay, and only 23 vials are scored. The `0.0265` threshold was selected after Dataset 5 analysis, so its performance is descriptive rather than an unbiased untouched-test result. Additional calibration experiments remain documented in the [model card](dataset2/MODEL_CARD.md) for technical review.
+These are prototype results, not a production acceptance claim. Dataset 5 ground truth uses expected carryover by batch position rather than an independent lab assay, and only 23 vials are scored. The `0.0265` threshold was selected after Dataset 5 analysis, so its performance is descriptive rather than an unbiased untouched-test result. A separate leave-one-recipe-out analysis, which the organizers recommended for unseen recipes, produced 71.4% recall, 75.0% specificity, and 73.2% balanced accuracy (see the [model card](dataset2/MODEL_CARD.md)).
 
 ## Repository map
 
@@ -94,6 +94,15 @@ Model weights are excluded in accordance with the hackathon repository guidance.
 - Operators remain responsible for flush, divert, and scrap decisions.
 - Real-machine calibration is required before deployment.
 - Alerts from synthetic training alone must not be treated as validated production defects.
+
+## Credits and references
+
+- **Data:** CSI Vial-Fill Multi-Camera Dataset (UWM Connected Systems Institute; contact Tanner Cellio, NVIDIA). Video 5 timing corrected by Team THD from the images (see [`dataset2/results`](dataset2/results)).
+- **Digital twin:** CSI vial-line digital twin v1 (UWM CSI / NVIDIA), rendered with NVIDIA Isaac Sim 6.0.1.
+- **Compute:** YAAD GPU Lab, NVIDIA DGX Spark (GB10) at UWM CSI.
+- **Software:** Python, PyTorch, NumPy, pandas, Pillow, OpenCV, Matplotlib, Pixar USD (`usd-core`).
+- **Event:** Rockwell Automation + NVIDIA Physical AI Hackathon, MSOE AI Club and UWM CSI, Fall 2026.
+- **AI tools:** Anthropic Claude and OpenAI Codex assisted with coding, debugging, and documentation; the team ran and checked all results.
 
 ## Hackathon
 
