@@ -13,7 +13,6 @@ import json
 import math
 import os
 import secrets
-import shutil
 import struct
 import subprocess
 import threading
@@ -25,6 +24,9 @@ QUEUE_FIELDS = [
     "vial", "recipe_id", "t100_ml", "t200_ml", "t400_ml", "total_ml",
     "expected_r", "expected_g", "expected_b", "expected_hue", "expected_hex",
 ]
+MIN_ACTIVE_TANK_ML = 10.0
+MAX_T200_ML = 50.0
+MAX_TOTAL_ML = 80.0
 
 
 class LiveControlError(RuntimeError):
@@ -70,6 +72,8 @@ def _read_npy_3x3(path):
 
 
 def _as_float(value, field, row_number, minimum=0.0):
+    if isinstance(value, bool):
+        raise LiveControlError(f"row {row_number}: {field} must be a number")
     try:
         number = float(value)
     except (TypeError, ValueError):
@@ -83,6 +87,18 @@ def _as_float(value, field, row_number, minimum=0.0):
 
 def _clean_number(value):
     return int(value) if float(value).is_integer() else round(float(value), 4)
+
+
+def _whole_vial_number(value, field="start_vial"):
+    if isinstance(value, bool):
+        raise LiveControlError(f"{field} must be a whole vial number")
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        raise LiveControlError(f"{field} must be a whole vial number") from None
+    if not math.isfinite(number) or number < 1 or not number.is_integer():
+        raise LiveControlError(f"{field} must be a whole vial number")
+    return int(number)
 
 
 def _expected_color(row, tank_colors):
@@ -126,21 +142,47 @@ def validate_queue(rows, tank_colors=None):
             raise LiveControlError(f"row {row_number}: vial {vial} is duplicated")
         if previous_vial is not None and vial <= previous_vial:
             raise LiveControlError(f"row {row_number}: vial numbers must increase")
+        if raw.get("t300_ml") not in (None, ""):
+            t300_ml = _as_float(raw["t300_ml"], "t300_ml", row_number, 0)
+            if t300_ml != 0:
+                raise LiveControlError(
+                    f"row {row_number}: T-300 is out of service and must remain at 0 mL"
+                )
         volumes = {
             name: _as_float(raw.get(name, 0), name, row_number, 0)
             for name in ("t100_ml", "t200_ml", "t400_ml")
         }
+        for name, value in volumes.items():
+            if 0 < value < MIN_ACTIVE_TANK_ML:
+                raise LiveControlError(
+                    f"row {row_number}: {name} must be 0 or at least "
+                    f"{MIN_ACTIVE_TANK_ML:g} mL"
+                )
+        if volumes["t200_ml"] > MAX_T200_ML:
+            raise LiveControlError(
+                f"row {row_number}: t200_ml must not exceed {MAX_T200_ML:g} mL"
+            )
         calculated_total = sum(volumes.values())
+        if calculated_total > MAX_TOTAL_ML:
+            raise LiveControlError(
+                f"row {row_number}: total volume must not exceed {MAX_TOTAL_ML:g} mL"
+            )
         supplied_total = raw.get("total_ml")
-        total = calculated_total if supplied_total in (None, "") else _as_float(
-            supplied_total, "total_ml", row_number, 0.001
+        reported_total = (
+            calculated_total
+            if supplied_total in (None, "")
+            else _as_float(supplied_total, "total_ml", row_number, 0.001)
         )
         if calculated_total <= 0:
             raise LiveControlError(f"row {row_number}: at least one tank volume must be positive")
-        if abs(total - calculated_total) > 0.05:
+        if abs(reported_total - calculated_total) > 0.05:
             raise LiveControlError(
-                f"row {row_number}: total_ml {total:g} does not equal tank volume sum {calculated_total:g}"
+                f"row {row_number}: total_ml {reported_total:g} does not equal "
+                f"tank volume sum {calculated_total:g}"
             )
+        # The component sum is authoritative. A reported total may differ by a
+        # small CSV-rounding amount, but it must not skew color/risk fractions.
+        total = calculated_total
         row = {
             "vial": vial,
             "recipe_id": recipe_id,
@@ -179,7 +221,8 @@ class LiveRunController:
     """Starts only allowlisted carryover-monitor container commands."""
 
     def __init__(self, *, live_root, workspace, code_dir, camera_dir, model_path,
-                 tank_colors_path, image, container_name="carryover-live-monitor"):
+                 tank_colors_path, image, container_name="carryover-live-monitor",
+                 preview_frame=None):
         self.live_root = Path(live_root).resolve()
         self.workspace = Path(workspace).resolve()
         self.code_dir = Path(code_dir).resolve()
@@ -188,12 +231,20 @@ class LiveRunController:
         self.tank_colors_path = Path(tank_colors_path).resolve() if tank_colors_path else None
         self.image = image
         self.container_name = container_name
+        self.preview_frame = Path(preview_frame).resolve() if preview_frame else None
         self.live_root.mkdir(parents=True, exist_ok=True)
         self.queue_path = self.live_root / "queue_drafts" / "current_queue.csv"
         self.state_path = self.live_root / "controller_state.json"
         self.audit_path = self.live_root / "control_audit.jsonl"
         self.lock = threading.RLock()
-        self.tank_colors = _read_npy_3x3(self.tank_colors_path) if self.tank_colors_path else None
+        self.tank_colors = None
+        if self.tank_colors_path:
+            try:
+                self.tank_colors = _read_npy_3x3(self.tank_colors_path)
+            except (OSError, ValueError, SyntaxError, struct.error, LiveControlError):
+                # Keep the dashboard available so its readiness check can show
+                # the invalid calibration instead of failing at startup.
+                pass
 
     def _docker(self, *arguments, check=True, timeout=30):
         try:
@@ -216,7 +267,12 @@ class LiveRunController:
             )
         except LiveControlError:
             return "unavailable"
-        return result.stdout.strip() if result.returncode == 0 else "stopped"
+        if result.returncode == 0:
+            return result.stdout.strip()
+        message = (result.stderr or result.stdout or "").lower()
+        if "no such object" in message or "no such container" in message:
+            return "stopped"
+        return "unavailable"
 
     def _read_state(self):
         if not self.state_path.is_file():
@@ -234,29 +290,56 @@ class LiveRunController:
         with self.audit_path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(record) + "\n")
 
-    def configured(self):
+    def _write_queue(self, path, rows):
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_name(f".{path.name}.{secrets.token_hex(5)}.tmp")
+        try:
+            with temporary.open("w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(
+                    handle, fieldnames=QUEUE_FIELDS, extrasaction="ignore",
+                )
+                writer.writeheader()
+                writer.writerows(rows)
+            os.replace(temporary, path)
+        finally:
+            try:
+                temporary.unlink()
+            except FileNotFoundError:
+                pass
+
+    def configured(self, container_status=None):
         def within_workspace(path):
             return bool(path and (path == self.workspace or self.workspace in path.parents))
 
+        tank_colors_ready = bool(
+            self.tank_colors_path and self.tank_colors_path.is_file()
+            and within_workspace(self.tank_colors_path)
+        )
+        if tank_colors_ready:
+            try:
+                self.tank_colors = _read_npy_3x3(self.tank_colors_path)
+                tank_colors_ready = self.tank_colors is not None
+            except (OSError, ValueError, SyntaxError, struct.error, LiveControlError):
+                self.tank_colors = None
+                tank_colors_ready = False
+        if container_status is None:
+            container_status = self._container_status()
         checks = {
             "camera_dir": bool(self.camera_dir and self.camera_dir.is_dir() and within_workspace(self.camera_dir)),
             "model": bool(self.model_path and self.model_path.is_file() and within_workspace(self.model_path)),
-            "tank_colors": bool(self.tank_colors_path and self.tank_colors_path.is_file() and within_workspace(self.tank_colors_path)),
+            "tank_colors": tank_colors_ready,
             "code": (self.code_dir / "live_monitor.py").is_file() and within_workspace(self.code_dir),
             "workspace": self.workspace.is_dir(),
+            "live_root": within_workspace(self.live_root),
+            "docker": container_status != "unavailable",
         }
         return checks, all(checks.values())
 
     def save_queue(self, rows):
         with self.lock:
             normalized = validate_queue(rows, self.tank_colors)
-            self.queue_path.parent.mkdir(parents=True, exist_ok=True)
-            temporary = self.queue_path.with_name(f".{self.queue_path.name}.{secrets.token_hex(5)}.tmp")
-            with temporary.open("w", newline="", encoding="utf-8") as handle:
-                writer = csv.DictWriter(handle, fieldnames=QUEUE_FIELDS, extrasaction="ignore")
-                writer.writeheader()
-                writer.writerows(normalized)
-            os.replace(temporary, self.queue_path)
+            self._write_queue(self.queue_path, normalized)
             self._audit("queue_saved", rows=len(normalized))
             return normalized
 
@@ -270,25 +353,44 @@ class LiveRunController:
         state = self._read_state()
         run_dir = Path(state["run_dir"]) if state.get("run_dir") else self.live_root / "no-run"
         queue_path = Path(state.get("queue_path", self.queue_path))
+        monitor_frame = run_dir / "latest_frame.jpg"
+        frame = monitor_frame
+        candidates = []
+        for candidate in (monitor_frame, self.preview_frame):
+            if candidate is None:
+                continue
+            try:
+                if candidate.is_file():
+                    candidates.append((candidate.stat().st_mtime_ns, candidate))
+            except OSError:
+                continue
+        if candidates:
+            # Prefer the freshest available source so a stale raw preview does
+            # not hide frames from an active analysis run.
+            frame = max(candidates, key=lambda item: item[0])[1]
         return {
             "queue": queue_path,
             "events": run_dir / "events.jsonl",
             "neural": run_dir / "neural_predictions.jsonl",
-            "frame": run_dir / "latest_frame.jpg",
+            "frame": frame,
         }
 
     def status(self):
         with self.lock:
             state = self._read_state()
             container_status = self._container_status()
+            checks, configured = self.configured(container_status)
             state.update({
                 "container_status": container_status,
                 "active": container_status in {"running", "paused"},
                 "paused": container_status == "paused",
                 "queue_saved": self.queue_path.is_file(),
                 "queue_rows": len(self.load_queue()),
-                "configured": self.configured()[1],
-                "configuration": self.configured()[0],
+                "configured": configured,
+                "configuration": checks,
+                "preview_frame_available": bool(
+                    self.preview_frame and self.preview_frame.is_file()
+                ),
                 "advisory_only": True,
             })
             return state
@@ -303,18 +405,22 @@ class LiveRunController:
                 raise LiveControlError("save and validate a recipe queue before starting")
             if self._container_status() in {"running", "paused"}:
                 raise LiveControlError("a live monitor run is already active")
-            queue = self.load_queue()
-            vials = [int(float(row["vial"])) for row in queue]
+            # Revalidate the persisted file at the execution boundary. This
+            # prevents an older or externally edited draft from bypassing the
+            # current physical-station limits.
+            queue = validate_queue(self.load_queue(), self.tank_colors)
+            vials = [int(row["vial"]) for row in queue]
             if start_vial is None:
                 start_vial = vials[0]
-            start_vial = int(start_vial)
+            else:
+                start_vial = _whole_vial_number(start_vial)
             if start_vial not in vials:
                 raise LiveControlError(f"vial {start_vial} is not in the saved queue")
             run_id = datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + secrets.token_hex(2)
             run_dir = self.live_root / "runs" / run_id
             run_dir.mkdir(parents=True, exist_ok=False)
             run_queue = run_dir / "queue.csv"
-            shutil.copy2(self.queue_path, run_queue)
+            self._write_queue(run_queue, queue)
             command = [
                 "run", "-d", "--rm", "--name", self.container_name, "--gpus", "all",
                 "--pull", "missing", "-v", f"{self.workspace}:{self.workspace}",
@@ -365,9 +471,15 @@ class LiveRunController:
 
     def realign(self, start_vial):
         with self.lock:
+            start_vial = _whole_vial_number(start_vial)
+            if not self.queue_path.is_file():
+                raise LiveControlError("save and validate a recipe queue before realigning")
+            queue = validate_queue(self.load_queue(), self.tank_colors)
+            if start_vial not in {int(row["vial"]) for row in queue}:
+                raise LiveControlError(f"vial {start_vial} is not in the saved queue")
             previous = self._read_state().get("run_id")
-            self.stop(reason=f"realign_to_vial_{int(start_vial)}")
-            status = self.start(start_vial=int(start_vial), reason=f"realign_from_{previous}")
-            self._audit("run_realigned", previous_run=previous, start_vial=int(start_vial))
+            self.stop(reason=f"realign_to_vial_{start_vial}")
+            status = self.start(start_vial=start_vial, reason=f"realign_from_{previous}")
+            self._audit("run_realigned", previous_run=previous, start_vial=start_vial)
             return status
 

@@ -2,9 +2,10 @@
 set -euo pipefail
 
 workspace="${CARRYOVER_WORKSPACE:-$HOME/workspace}"
-code_dir="$(cd "$(dirname "$0")/.." && pwd)"
-model="$workspace/models/carryover_detector/v0.1.0-synthetic/model.ts"
-tank_colors="$workspace/jobs/dataset5_shadow_replay/input/tank_colors.npy"
+workspace=$(realpath -m "$workspace")
+code_dir="$(cd "$(dirname "$0")/../code" && pwd)"
+model=$(realpath -m "${CARRYOVER_MODEL:-$workspace/live/models/carryover/model.ts}")
+tank_colors=$(realpath -m "${CARRYOVER_TANK_COLORS:-$workspace/live/models/carryover/tank_colors.npy}")
 image="${CARRYOVER_IMAGE:-nvcr.io/nvidia/pytorch:25.10-py3}"
 container_name="${CARRYOVER_CONTAINER:-carryover-live-monitor}"
 
@@ -17,10 +18,23 @@ camera_dir=$(realpath "$1")
 queue_csv=$(realpath "$2")
 live_dir=$(realpath -m "${3:-$workspace/live/carryover-monitor}")
 
+[[ -d "$workspace" ]] || { echo "Workspace not found: $workspace" >&2; exit 1; }
 [[ -d "$camera_dir" ]] || { echo "Camera folder not found: $camera_dir" >&2; exit 1; }
 [[ -f "$queue_csv" ]] || { echo "Queue CSV not found: $queue_csv" >&2; exit 1; }
+[[ -f "$code_dir/live_monitor.py" ]] || { echo "Monitor code not found: $code_dir/live_monitor.py" >&2; exit 1; }
 [[ -f "$model" ]] || { echo "Model not found: $model" >&2; exit 1; }
+[[ -f "$tank_colors" ]] || { echo "Tank calibration not found: $tank_colors" >&2; exit 1; }
 [[ $(wc -l < "$queue_csv") -gt 1 ]] || { echo "Queue CSV has no recipe rows" >&2; exit 1; }
+
+for path in "$code_dir" "$camera_dir" "$queue_csv" "$live_dir" "$model" "$tank_colors"; do
+  if [[ "$path" != "$workspace" && "$path" != "$workspace/"* ]]; then
+    echo "Path must be inside the mounted workspace $workspace: $path" >&2
+    exit 1
+  fi
+done
+
+command -v docker >/dev/null 2>&1 || { echo "Docker is not installed" >&2; exit 1; }
+docker info >/dev/null 2>&1 || { echo "Docker is unavailable to this account" >&2; exit 1; }
 
 if docker container inspect "$container_name" >/dev/null 2>&1; then
   echo "Container $container_name already exists. Stop or remove that specific container before starting another live monitor." >&2

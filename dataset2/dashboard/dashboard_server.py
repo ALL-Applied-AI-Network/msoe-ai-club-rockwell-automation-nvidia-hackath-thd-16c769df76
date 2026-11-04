@@ -20,6 +20,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs
 
+from camera_preview import CameraPreview, CameraPreviewError
 from demo_control import DemoRunController
 from live_control import LiveControlError, LiveRunController, validate_queue
 
@@ -168,6 +169,56 @@ def build_state(queue_path, events_path, neural_path, frame_path, frame_url="/ap
     }
 
 
+def camera_preview_is_analysis_source(server):
+    """Return whether the V4L2 adapter's output folder feeds the monitor."""
+    preview_frame = getattr(server.live_controller, "preview_frame", None)
+    camera_dir = getattr(server.live_controller, "camera_dir", None)
+    return bool(
+        server.camera_preview
+        and preview_frame
+        and camera_dir
+        and camera_dir == preview_frame.parent
+    )
+
+
+def camera_preview_ready(preview):
+    """Require a running capture process and a frame published in the last 3 s."""
+    if not preview:
+        return False
+    frame_age = preview.get("frame_age_seconds")
+    return bool(
+        preview.get("running")
+        and preview.get("frame_available")
+        and frame_age is not None
+        and frame_age < 3
+    )
+
+
+def live_control_status(server):
+    """Combine analysis-container state with the separate raw-camera adapter."""
+    control = server.live_controller.status()
+    preview = (
+        server.camera_preview.status()
+        if server.camera_preview
+        else {"configured": False, "running": False, "frame_available": False}
+    )
+    control["camera_preview"] = preview
+    if server.camera_preview:
+        preview_ready = camera_preview_ready(preview)
+        preview["ready"] = preview_ready
+        control.setdefault("configuration", {})["camera_preview"] = preview_ready
+        if camera_preview_is_analysis_source(server):
+            control["configured"] = bool(control.get("configured") and preview_ready)
+    return control
+
+
+def dashboard_destination(server, requested=None):
+    """Choose an allowlisted landing page without mixing live and saved data."""
+    if requested in {"/live", "/demo"}:
+        return requested
+    return "/live" if server.camera_preview is not None else "/demo"
+
+
 class DashboardHandler(BaseHTTPRequestHandler):
     server_version = "CarryoverDashboard/2.0"
 
@@ -273,7 +324,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 return
             self.send_json(200, {
                 "csrf_token": self.server.csrf_token,
-                "control": self.server.live_controller.status(),
+                "control": live_control_status(self.server),
                 "queue": self.server.live_controller.load_queue(),
                 "profiles": [{
                     "id": "live_camera", "name": "CSI live camera",
@@ -291,7 +342,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 paths["queue"], paths["events"], paths["neural"], paths["frame"],
                 "/api/live/latest-frame",
             )
-            state["control"] = self.server.live_controller.status()
+            state["control"] = live_control_status(self.server)
+            state["camera_preview"] = state["control"]["camera_preview"]
             self.send_json(200, state)
             return
         if path == "/api/latest-frame":
@@ -331,7 +383,13 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if path == "/style.css":
             self.serve_file(STATIC / "style.css", "text/css; charset=utf-8")
             return
-        if path in {"/", "/demo"} and self.authenticated():
+        if path == "/" and self.authenticated():
+            self.send_bytes(
+                303, b"", "text/plain",
+                {"Location": dashboard_destination(self.server)},
+            )
+            return
+        if path == "/demo" and self.authenticated():
             self.serve_file(STATIC / "index.html", "text/html; charset=utf-8")
             return
         if path == "/live" and self.authenticated():
@@ -357,7 +415,13 @@ class DashboardHandler(BaseHTTPRequestHandler):
             cookie = (
                 f"{COOKIE_NAME}={self.server.session_key}; Path=/; HttpOnly; SameSite=Strict; Max-Age=43200"
             )
-            self.send_bytes(303, b"", "text/plain", {"Location": "/demo", "Set-Cookie": cookie})
+            destination = dashboard_destination(
+                self.server, form.get("next", [None])[0],
+            )
+            self.send_bytes(
+                303, b"", "text/plain",
+                {"Location": destination, "Set-Cookie": cookie},
+            )
             return
         if not (path.startswith("/api/live/") or path.startswith("/api/demo/")):
             self.send_error(404)
@@ -397,6 +461,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     raise LiveControlError("only the predefined live_camera profile is allowed")
                 if payload.get("confirmed") is not True:
                     raise LiveControlError("operator confirmation is required")
+                if (
+                    camera_preview_is_analysis_source(self.server)
+                    and not camera_preview_ready(self.server.camera_preview.status())
+                ):
+                    raise LiveControlError("live camera is not publishing fresh frames")
                 self.send_json(200, controller.start(start_vial=payload.get("start_vial")))
             elif path == "/api/live/stop":
                 if payload.get("confirmed") is not True:
@@ -409,6 +478,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
             elif path == "/api/live/realign":
                 if payload.get("confirmed") is not True:
                     raise LiveControlError("operator confirmation is required")
+                if (
+                    camera_preview_is_analysis_source(self.server)
+                    and not camera_preview_ready(self.server.camera_preview.status())
+                ):
+                    raise LiveControlError("live camera is not publishing fresh frames")
                 self.send_json(200, controller.realign(payload.get("start_vial")))
             else:
                 self.send_error(404)
@@ -432,6 +506,15 @@ def main():
     parser.add_argument("--live-workspace", default=os.environ.get("CARRYOVER_WORKSPACE", str(Path.home() / "workspace")))
     parser.add_argument("--live-code-dir", help="folder containing live_monitor.py")
     parser.add_argument("--live-camera-dir", help="allowlisted CSI camera JPEG folder")
+    parser.add_argument(
+        "--live-camera-device",
+        help="local V4L2 device used for raw preview and optional folder ingest",
+    )
+    parser.add_argument("--live-camera-width", type=int, default=640)
+    parser.add_argument("--live-camera-height", type=int, default=480)
+    parser.add_argument("--live-camera-input-fps", type=float, default=30)
+    parser.add_argument("--live-camera-preview-fps", type=float, default=5)
+    parser.add_argument("--live-camera-name", default="CSI vial-fill camera")
     parser.add_argument("--live-model", help="allowlisted TorchScript model.ts")
     parser.add_argument("--live-tank-colors", help="allowlisted 3x3 tank_colors.npy")
     parser.add_argument("--live-image", default=os.environ.get("CARRYOVER_IMAGE", "nvcr.io/nvidia/pytorch:25.10-py3"))
@@ -448,6 +531,22 @@ def main():
     args = parser.parse_args()
 
     token = args.token or secrets.token_urlsafe(18)
+    live_root = Path(args.live_root).resolve() if args.live_root else Path(args.events).resolve().parent / "live_control"
+    preview_frame = live_root / "camera_preview" / "latest_frame.jpg" if args.live_camera_device else None
+    camera_preview = None
+    if args.live_camera_device:
+        try:
+            camera_preview = CameraPreview(
+                args.live_camera_device,
+                preview_frame,
+                width=args.live_camera_width,
+                height=args.live_camera_height,
+                input_fps=args.live_camera_input_fps,
+                preview_fps=args.live_camera_preview_fps,
+                source_name=args.live_camera_name,
+            )
+        except CameraPreviewError as error:
+            parser.error(str(error))
     server = ThreadingHTTPServer((args.host, args.port), DashboardHandler)
     server.token = token
     server.session_key = hashlib.sha256((token + secrets.token_hex(16)).encode()).hexdigest()
@@ -459,7 +558,7 @@ def main():
         Path(args.latest_frame).resolve()
         if args.latest_frame else server.events_path.with_name("latest_frame.jpg")
     )
-    live_root = Path(args.live_root).resolve() if args.live_root else server.events_path.parent / "live_control"
+    server.camera_preview = camera_preview
     server.live_controller = LiveRunController(
         live_root=live_root,
         workspace=args.live_workspace,
@@ -469,6 +568,7 @@ def main():
         tank_colors_path=args.live_tank_colors,
         image=args.live_image,
         container_name=args.live_container_name,
+        preview_frame=preview_frame,
     )
     demo_workspace = Path(args.demo_workspace or args.live_workspace).resolve()
     demo_root = Path(args.demo_root).resolve() if args.demo_root else server.events_path.parent / "demo_control"
@@ -487,10 +587,18 @@ def main():
     print(f"Login token: {token}")
     print("Advisory monitor only. Live controls do not connect to or control the PLC.")
     try:
+        if camera_preview:
+            camera_preview.start()
+            print(f"Camera preview: {args.live_camera_name} ({args.live_camera_device})")
         server.serve_forever()
+    except CameraPreviewError as error:
+        print(f"Camera preview failed: {error}")
+        raise SystemExit(2) from error
     except KeyboardInterrupt:
         print("\nDashboard stopped.")
     finally:
+        if camera_preview:
+            camera_preview.stop()
         server.server_close()
 
 

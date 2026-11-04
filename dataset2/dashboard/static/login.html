@@ -15,9 +15,16 @@
     <form method="post" action="/login">
       <label for="token">Dashboard token</label>
       <input id="token" name="token" type="password" autocomplete="current-password" required autofocus>
+      <input id="next" name="next" type="hidden" value="">
       <button type="submit">Open dashboard</button>
     </form>
     <p class="security-note">The token is printed in the dashboard server terminal.</p>
   </main>
+  <script>
+    const requested = window.location.pathname;
+    if (requested === '/live' || requested === '/demo') {
+      document.querySelector('#next').value = requested;
+    }
+  </script>
 </body>
 </html>

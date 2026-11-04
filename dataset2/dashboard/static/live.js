@@ -109,6 +109,8 @@ function describeControl(control) {
   if (control.run_id) details.push(`<strong>Run:</strong> ${html(control.run_id)}`);
   if (control.started_at) details.push(`<strong>Started:</strong> ${new Date(control.started_at).toLocaleString()}`);
   if (control.start_vial) details.push(`<strong>Aligned next:</strong> vial ${html(control.start_vial)}`);
+  if (control.camera_preview?.ready) details.push('<strong>Camera preview:</strong> live');
+  else if (control.camera_preview?.configured) details.push('<strong>Camera preview:</strong> reconnecting');
   liveUi.runDetails.innerHTML = details.length ? details.join('<br>') : 'No live run has been started.';
   const checks = control.configuration || {};
   liveUi.checks.innerHTML = Object.entries(checks).map(([name, ready]) => `<span class="config-item ${ready ? 'ready' : 'missing'}">${ready ? '✓' : '!'} ${html(name.replace('_', ' '))}</span>`).join('');

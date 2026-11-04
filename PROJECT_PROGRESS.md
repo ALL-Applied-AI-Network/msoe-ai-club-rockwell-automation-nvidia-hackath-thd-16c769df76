@@ -42,18 +42,21 @@ The team selected Fluid Mixing Station 3 and focused on carryover: residual liqu
 - Built a token-protected dashboard that binds to localhost.
 - Added the entire recipe queue, active/next recipe, live model probability, event timeline, and distinct future-risk versus observed-defect pop-ups.
 - Added a live `latest_frame` camera panel with model and color-rule overlays.
-- Added 20 ms folder polling with file-stability checks for a 30 fps camera folder.
+- Added 20 ms folder polling with file-stability checks for unique-frame camera folders; the fixed-path V4L2 adapter uses a bounded 5 fps stream.
 - Replayed the corrected Dataset 5 recording through the actual frozen model at original timing and verified the live dashboard end to end.
 - Split the operator interface into a stable `/demo` saved-run presentation and a separate `/live` CSI testing workspace.
 - Added dashboard recipe entry/CSV import, expected-color calculation, validation, timestamped queue snapshots, and guarded start/pause/resume/stop/realign controls for the advisory monitor only.
 - Deployed the split-view dashboard beside v2 on Spark localhost port 20401 and verified both views through an independent SSH tunnel; the preserved port-20400 presentation was not changed.
 - Added an on-demand Dataset 5 control panel to `/demo` that can launch the frozen model at 1x live speed, stream fresh frames/results into the dashboard, and pause, resume, restart, or stop the isolated replay while preserving every run.
 - Reduced operator interruption by presenting neural `MODEL` events as purple non-blocking watches and recipe `PREDICT` events as amber banners; only color `DETECT` and `CONFIRM` evidence opens an acknowledgement modal. The demo and live launchers now use the recall-prioritized `0.0071` threshold with three-of-five persistence, intentionally accepting more false alarms to reduce missed defects.
+- Identified the local USB camera's stable V4L2 link and verified the token-protected 640x480 raw preview end to end; the authenticated live-state API reported a fresh frame about 52 ms old.
+- Cached the NVIDIA PyTorch runtime and completed a local camera-plus-model readiness run on 2026-11-03. Artifact hashes, CUDA model loading, and a real TorchScript forward pass succeeded on the NVIDIA GB10; the live dashboard then started a nine-vial advisory run and reported a monitor-owned frame about 120 ms old while its frame and event-heartbeat files continued refreshing.
+- Fixed GB10 unified-memory startup reliability by loading the small TorchScript model on CPU before moving it to CUDA. The live run was stopped through the authenticated API, and the container, camera process, and dashboard listener all shut down cleanly. No colored fill was performed, so this proves runtime readiness and frame ingestion, not a physical carryover alert or production behavior.
 
 ## Deployment boundary and next steps
 
 - The CSI machine was unavailable during the planned physical test, so no production claim is made.
-- Identify the line-attached Spark's camera source and add an RTSP or V4L2 adapter if it is not a JPEG folder.
+- The local vial-fill source was identified as a USB V4L2 camera. A supervised FFmpeg adapter now publishes a token-protected raw preview and an atomically replaced JPEG that the folder watcher can consume. Camera-to-container ingestion and an independent GPU model forward pass are verified; full camera-to-alert latency still needs to be measured during a labeled colored fill.
 - Collect labeled real fills across recipes and lighting conditions.
 - Calibrate thresholds on a separate real validation set and retain a final untouched test set.
 - Measure camera-to-alert latency and operator usefulness at CSI.

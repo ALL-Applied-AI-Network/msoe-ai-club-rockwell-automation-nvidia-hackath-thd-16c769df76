@@ -29,16 +29,25 @@ which a web dashboard can read.
 
 import argparse
 import csv
-import glob
 import json
 import os
 import shutil
+import tempfile
 import time
 from collections import deque
 from datetime import datetime
 
 import numpy as np
 from PIL import Image
+
+try:
+    from .frame_watch import (
+        StableJpegWatcher,
+        safe_reopen_mask,
+        snapshot_jpeg_version,
+    )
+except ImportError:  # Direct execution: python3 live_monitor.py
+    from frame_watch import StableJpegWatcher, safe_reopen_mask, snapshot_jpeg_version
 
 BASE = os.environ.get("CARRYOVER_WORKSPACE", os.path.expanduser("~/workspace"))
 DATA = f"{BASE}/data/csi-vial-fill-dataset/vial_fill"
@@ -188,31 +197,38 @@ def replay_source(speed):
 
 
 def watch_source(folder, poll=0.02):
-    """Yield complete new JPEGs without throttling a 30 fps camera.
+    """Yield bounded immutable snapshots of complete camera JPEG versions.
 
     A file is considered complete after its size and modification time remain
     unchanged across two polls. This avoids reading a partially written frame
-    without adding the old fixed 0.2-second delay to every image.
+    without adding the old fixed 0.2-second delay to every image. Updated paths
+    are yielded again so a camera may atomically replace one preview filename.
+    At most ``MIN_FILL_FRAMES`` snapshots are retained, which preserves the
+    fill-confirmation frames without creating an unbounded camera spool.
     """
-    seen = set(glob.glob(os.path.join(folder, "*.jpg")))   # ignore files already there
-    pending = {}
+    watcher = StableJpegWatcher(folder)
     print(f"(watching {folder} for new images every {poll * 1000:.0f} ms; Ctrl+C to stop)")
-    while True:
-        for p in sorted(glob.glob(os.path.join(folder, "*.jpg"))):
-            if p in seen:
-                continue
-            try:
-                stat = os.stat(p)
-            except FileNotFoundError:
-                continue
-            signature = (stat.st_size, stat.st_mtime_ns)
-            if stat.st_size > 0 and pending.get(p) == signature:
-                seen.add(p)
-                pending.pop(p, None)
-                yield p, frame_time(p)
-            else:
-                pending[p] = signature
-        time.sleep(poll)
+    with tempfile.TemporaryDirectory(prefix="carryover-frame-snapshots-") as root:
+        snapshots = deque()
+        sequence = 0
+        while True:
+            for path, signature in watcher.scan_versions():
+                sequence += 1
+                snapshot = os.path.join(
+                    root, f"{sequence:012d}", os.path.basename(path),
+                )
+                if not snapshot_jpeg_version(path, signature, snapshot):
+                    continue
+                snapshots.append(snapshot)
+                while len(snapshots) > MIN_FILL_FRAMES:
+                    expired = snapshots.popleft()
+                    try:
+                        os.unlink(expired)
+                        os.rmdir(os.path.dirname(expired))
+                    except FileNotFoundError:
+                        pass
+                yield snapshot, frame_time(path)
+            time.sleep(poll)
 
 
 # ---------------------------------------------------------------- main loop
@@ -233,12 +249,12 @@ def run(source, queue, neural=None, start_index=0):
     cur, unexpected_run, did_detect = None, 0, False
     last_frame_publish = 0.0
 
-    def filling_frame(path, frac, hue, now):
+    def filling_frame(path, frac, hue, now, *, infer_neural=True):
         """One frame of the vial being filled: remember its hue, and DETECT
         colors this recipe cannot make. `now` = time the alert is raised."""
         nonlocal unexpected_run, did_detect
         recent.append(hue)
-        if neural is not None:
+        if neural is not None and infer_neural:
             previous_recipe = queue[i - 1] if i > 0 else cur
             result = neural.predict(path, now, int(cur["vial"]), previous_recipe, cur)
             if result["new_shadow_alert"]:
@@ -306,8 +322,13 @@ def run(source, queue, neural=None, start_index=0):
                 lead = f" (warned {(t0 - first_alert[v]).total_seconds():.0f} s before the fill started)"
             emit("INFO", t, v, f"fill started at {t0:%H:%M:%S}, recipe {int(cur['recipe_id'])}{lead}",
                  state="FILLING", recipe_id=int(cur["recipe_id"]))
-            for pp, _, pf, ph in pending:        # catch up on the frames we waited for
-                filling_frame(pp, pf, ph, t)
+            reopen_mask = safe_reopen_mask(pp for pp, _, _, _ in pending)
+            for (pp, _, pf, ph), can_reopen in zip(pending, reopen_mask):
+                # A fixed latest_frame.jpg is mutable. Its older pending
+                # versions can no longer be reopened safely, so retain their
+                # measured color history without counting the newest image
+                # multiple times toward neural persistence.
+                filling_frame(pp, pf, ph, t, infer_neural=can_reopen)
             pending.clear()
             continue
 

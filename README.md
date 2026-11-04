@@ -82,7 +82,18 @@ The server binds to `127.0.0.1:20400` by default and prints a login token. Use a
 
 ## Live CSI path
 
-`dataset2/dashboard/start_live_monitor.sh` watches a camera JPEG folder with file-stability checks, runs the frozen model in the NVIDIA PyTorch container, and feeds the same dashboard. The exact line-camera source still needs to be identified and latency-tested on the physical CSI system. An adapter will be required if the camera provides RTSP or `/dev/video` instead of JPEG files.
+`dataset2/dashboard/start_live_monitor.sh` watches a camera JPEG folder with file-stability checks, runs the frozen model in the NVIDIA PyTorch container, and feeds the same dashboard. The local vial-fill source is a USB V4L2 camera; physical-line latency still needs to be measured with the full analysis pipeline.
+
+For the local CSI capture station, the dashboard can also provide a raw,
+token-protected preview directly from the vial-fill V4L2 device with
+`--live-camera-device`. The adapter only captures and displays frames; it makes
+no carryover decisions. Its bounded JPEG output can also serve as the separate
+monitor's folder input, which still requires the frozen model and tank-color
+calibration.
+
+See [LIVE_CSI_TEST.md](LIVE_CSI_TEST.md) for the sanitized local readiness-test
+record, saved evidence boundary, validation results, and remaining physical-test
+limitations.
 
 ## Reproducing the model
 

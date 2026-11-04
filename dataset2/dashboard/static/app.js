@@ -260,8 +260,16 @@ async function refresh() {
     }
     activeDemoRunId = demoRunId;
     const active = state.monitor.status === 'active';
-    ui.connectionDot.className = `status-dot ${active ? '' : 'waiting'}`;
-    ui.connectionText.textContent = active ? 'Monitor active' : (state.monitor.has_events ? 'Monitor idle' : 'Waiting for monitor');
+    const liveMode = document.body.dataset.mode === 'live';
+    const cameraLive = liveMode
+      && state.frame?.available
+      && Number(state.frame.age_seconds || 0) < 3;
+    ui.connectionDot.className = `status-dot ${active || cameraLive ? '' : 'waiting'}`;
+    ui.connectionText.textContent = active
+      ? 'Monitor active'
+      : cameraLive
+        ? 'Camera live · monitor idle'
+        : (state.monitor.has_events ? 'Monitor idle' : (liveMode ? 'Waiting for camera' : 'Waiting for monitor'));
     renderCurrent(state.current);
     renderFrame(state.frame);
     renderQueue(state.queue, state.counts);

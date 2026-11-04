@@ -52,7 +52,12 @@ class NeuralShadowMonitor:
             raise ValueError("require 1 <= min_frames <= window")
         self.torch = torch
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = torch.jit.load(str(model_path), map_location=self.device).eval()
+        # Loading directly onto CUDA can make the JIT loader request a large
+        # contiguous allocation before unified-memory page cache is reclaimed.
+        # Loading on CPU first keeps startup reliable, then transfers only the
+        # model's actual parameters to the selected inference device.
+        self.model = torch.jit.load(str(model_path), map_location="cpu")
+        self.model = self.model.to(self.device).eval()
         self.threshold = float(threshold)
         self.window = int(window)
         self.min_frames = int(min_frames)
